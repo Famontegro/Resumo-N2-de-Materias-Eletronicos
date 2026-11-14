@@ -1,0 +1,2278 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Bancada N2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: caderno de bancada. Menu lateral fixo, uma seção por vez, simuladores sobre papel milimetrado.
+   Cores de caneta de quadro: azul = dado, vermelho = resultado, verde = identidade. */
+:root{
+  --font-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --font-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#EDF2EE; --surface:#FFFFFF; --surface2:#F4F8F5; --ink:#13211B; --muted:#4F6157; --line:#C9D5CD; --grid:rgba(19,33,27,.055);
+  --accent:#0C6648; --accent-soft:#D5EDE2; --on-accent:#FFFFFF;
+  --red:#BF2B24; --red-soft:#FBE3E0; --blue:#2150BC; --blue-soft:#E0E9FB; --amber:#8F5900; --amber-soft:#FBEED0;
+  --shadow:0 1px 0 rgba(19,33,27,.07),0 8px 20px -12px rgba(19,33,27,.28);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1512; --surface:#15201B; --surface2:#1A2823; --ink:#E5EEE8; --muted:#9CB0A5; --line:#2B3C34; --grid:rgba(229,238,232,.05);
+    --accent:#5CD3A3; --accent-soft:#12372B; --on-accent:#08231A;
+    --red:#FF8279; --red-soft:#3A1D1B; --blue:#8AABFF; --blue-soft:#192750; --amber:#F2BA58; --amber-soft:#392D10;
+    --shadow:0 1px 0 rgba(0,0,0,.4),0 8px 20px -12px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1512; --surface:#15201B; --surface2:#1A2823; --ink:#E5EEE8; --muted:#9CB0A5; --line:#2B3C34; --grid:rgba(229,238,232,.05);
+  --accent:#5CD3A3; --accent-soft:#12372B; --on-accent:#08231A;
+  --red:#FF8279; --red-soft:#3A1D1B; --blue:#8AABFF; --blue-soft:#192750; --amber:#F2BA58; --amber-soft:#392D10;
+  --shadow:0 1px 0 rgba(0,0,0,.4),0 8px 20px -12px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; font:16px/1.6 var(--font-body); color:var(--ink); background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));
+  padding-block:0;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:60}
+h1,h2,h3{font-family:var(--font-display);line-height:1.12;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,5vw,3rem);font-weight:800}
+h2{font-size:1.45rem;font-weight:800;margin-bottom:.5rem}
+h3{font-size:1.1rem;font-weight:700;margin:1.2rem 0 .4rem}
+p{margin:.5rem 0}
+a{color:var(--accent);text-underline-offset:3px}
+sub,sup{font-size:.72em;line-height:0}
+b,strong{font-weight:600}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
+[hidden]{display:none!important}
+
+/* estrutura */
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px;max-width:1240px;margin:0 auto}
+.side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 0;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:800;font-size:1.35rem;margin-bottom:10px;text-decoration:none;color:var(--ink)}
+.brand svg{flex:none}
+.navgrp{font:500 .72rem var(--font-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px;padding-left:10px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-weight:500;font-size:.95rem}
+.nav a:hover{background:var(--surface)}
+.nav a[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+.nav .n{font:500 .75rem var(--font-mono);min-width:1.6em;height:1.6em;display:inline-grid;place-items:center;border-radius:6px;border:1px solid currentColor;opacity:.85;flex:none}
+.themebox{margin-top:auto;padding-top:16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{font:500 .82rem var(--font-body);padding:7px 12px;background:transparent;color:var(--muted);border:0;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.main{padding:28px 0 80px;min-width:0}
+.view>*+*{margin-top:18px}
+.page-head{margin-bottom:6px}
+.eyebrow{font:500 .78rem var(--font-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.lede{font-size:1.1rem;color:var(--muted);max-width:62ch;margin-top:10px}
+
+/* blocos */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);min-width:0}
+.card>h2:first-child{margin-top:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;max-width:78ch}
+.note.n-red{border-color:var(--red);background:var(--red-soft)}
+.note.n-blue{border-color:var(--blue);background:var(--blue-soft)}
+.note.n-amber{border-color:var(--amber);background:var(--amber-soft)}
+.note p:first-child{margin-top:0}.note p:last-child{margin-bottom:0}
+.eq{font-family:var(--font-mono);font-size:.95rem;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:inline-block;margin:4px 6px 4px 0;white-space:normal}
+.eq.res{border-color:var(--red);color:var(--red)}
+.k-blue{color:var(--blue);font-weight:600}.k-red{color:var(--red);font-weight:600}
+ul.tight,ol.tight{margin:.4rem 0;padding-left:1.25rem}
+ul.tight li,ol.tight li{margin:.25rem 0}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 .74rem var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);white-space:nowrap}
+td.m,.mono{font-family:var(--font-mono)}
+.tag{font:500 .72rem var(--font-mono);letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.badge{font:600 .78rem var(--font-mono);letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid currentColor;display:inline-block}
+.b-corte{color:var(--muted)}.b-ativa{color:var(--blue);background:var(--blue-soft)}.b-sat{color:var(--red);background:var(--red-soft)}
+.b-ok{color:var(--accent);background:var(--accent-soft)}.b-part{color:var(--amber);background:var(--amber-soft)}.b-no{color:var(--muted)}
+
+/* medidores da página inicial */
+.meter{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+.meter .k{font:500 .75rem var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.meter .v{font:800 2rem var(--font-display);margin:2px 0 8px}
+.bar{height:8px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s}
+.road{counter-reset:r;list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.road li{counter-increment:r;display:flex;gap:12px;align-items:baseline}
+.road li::before{content:counter(r);font:500 .8rem var(--font-mono);flex:none;width:1.8em;height:1.8em;display:grid;place-items:center;border-radius:50%;background:var(--accent);color:var(--on-accent)}
+
+/* controles */
+.btn{font:500 .92rem var(--font-body);padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.ghost{background:transparent}
+.btn[aria-pressed="true"]{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 .88rem var(--font-body);padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.field{display:grid;gap:4px;font-size:.9rem;min-width:0}
+.field>span{display:block;color:var(--muted)}
+.field>span b{float:right;margin-left:8px;font:500 .9rem var(--font-mono);color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=number],input[type=text],select{font:500 1rem var(--font-mono);padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);width:100%;min-width:0}
+.sim{display:grid;grid-template-columns:minmax(210px,280px) minmax(0,1fr);gap:22px;align-items:start}
+.ctrl{display:grid;gap:14px}
+.viz{min-width:0;display:grid;gap:14px}
+.ro{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.ro>div{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.ro .k{font:500 .7rem var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.ro .v{font:500 1.05rem var(--font-mono)}
+.plot{width:100%;overflow-x:auto}
+.plot svg,.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.plots2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+svg .gl{stroke:var(--line);stroke-width:1;opacity:.7}
+svg .ax{stroke:var(--ink);stroke-width:1.4}
+svg .tk{font:11px var(--font-mono);fill:var(--muted)}
+svg .al{font:12px var(--font-body);fill:var(--ink)}
+svg .crv{fill:none;stroke:var(--blue);stroke-width:1.8;opacity:.85}
+svg .cur{fill:none;stroke:var(--accent);stroke-width:2.6;stroke-dasharray:7 4}
+svg .ldl{stroke:var(--red);stroke-width:2.4}
+svg .qpt{fill:var(--red);stroke:var(--surface);stroke-width:2}
+svg .loc{fill:none;stroke:var(--red);stroke-width:1.6;stroke-dasharray:3 4}
+svg .st{font:600 12px var(--font-mono);fill:var(--ink)}
+svg .lbl{font:500 12px var(--font-body);fill:var(--ink)}
+svg .blk{fill:var(--surface2);stroke:var(--ink);stroke-width:1.6}
+svg .wire{fill:none;stroke:var(--ink);stroke-width:2}
+.fig{background:var(--surface2);border:1px dashed var(--line);border-radius:12px;padding:10px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+
+/* explorador de regiões */
+.regview{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:center;margin-top:14px}
+.regview h3{margin-top:0}
+
+/* passos de cálculo */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.steps li{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:.95rem}
+.steps .r{color:var(--red);font-weight:600}
+.steps .e{font-family:var(--font-mono);font-size:.92rem}
+
+/* fluxos causa e efeito */
+.flowcard{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface)}
+.flowcard h3{margin:0 0 8px}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px;margin-top:12px}
+.node{border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface2);transition:background .2s,border-color .2s;min-width:0}
+.node .nn{font:500 .7rem var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.node .nt{font-weight:600;font-size:.9rem;overflow-wrap:anywhere}
+.node.on{background:var(--accent-soft);border-color:var(--accent)}
+.node.on .nn{color:var(--accent)}
+
+/* exercícios */
+.qcard{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+.qcard.ok{border-left-color:var(--accent)}.qcard.bad{border-left-color:var(--red)}
+.qh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.qn{font:800 1.1rem var(--font-display)}
+.qh .grow{flex:1}
+.lnk{background:none;border:0;color:var(--accent);font:500 .88rem var(--font-body);cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:2px}
+.qs{font-size:1.02rem;max-width:72ch}
+.ans{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.ans input{width:150px}
+.ans .u{font:500 1rem var(--font-mono);color:var(--muted)}
+.opts{display:grid;gap:8px;margin-top:12px}
+.opt{text-align:left;font:500 .98rem var(--font-body);padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);cursor:pointer}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt.right{border-color:var(--accent);background:var(--accent-soft)}
+.opt.wrong{border-color:var(--red);background:var(--red-soft)}
+.fb{margin-top:10px;font-weight:600;min-height:1.4em}
+.fb.ok{color:var(--accent)}.fb.bad{color:var(--red)}
+.qa{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hint,.sol{margin-top:10px}
+.exsum{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.list{display:grid;gap:14px}
+
+/* cartões */
+.deck{max-width:640px}
+.fc{perspective:1200px;cursor:pointer;min-height:240px;width:100%;background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit}
+.fc .in{position:relative;min-height:240px;transition:transform .45s;transform-style:preserve-3d}
+.fc.flip .in{transform:rotateY(180deg)}
+.fc .face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;justify-content:center;gap:10px;overflow:auto}
+.fc .back{transform:rotateY(180deg);background:var(--accent-soft);border-color:var(--accent)}
+.fc .face .tag{align-self:flex-start}
+.fc .q{font:700 1.35rem var(--font-display)}
+.fc .a{font-size:1.08rem}
+.dbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+
+/* responsivo */
+@media (max-width:980px){
+  .sim{grid-template-columns:minmax(0,1fr)}
+  .regview{grid-template-columns:minmax(0,1fr)}
+  .grid3{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:860px){
+  .app{display:block}
+  .side{position:sticky;top:env(safe-area-inset-top,0px);height:auto;overflow:visible;padding:10px 0 8px;background:var(--bg);z-index:50;flex-direction:row;flex-wrap:nowrap;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+  .brand{margin:0;font-size:1.1rem}
+  .brand span{display:none}
+  .navgrp,.themebox{display:none}
+  .nav{flex-direction:row;overflow-x:auto;gap:6px;flex:1;scrollbar-width:thin;padding-bottom:2px}
+  .nav a{white-space:nowrap;padding:7px 11px;background:var(--surface);border:1px solid var(--line)}
+  .main{padding-top:20px}
+  .grid2,.plots2{grid-template-columns:minmax(0,1fr)}
+  .card{padding:16px}
+  .themebox.mobile{display:block;margin-top:18px}
+}
+@media (min-width:861px){.themebox.mobile{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.fc .in{transition:none}}
+.dados{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.dados span{font:500 .82rem var(--font-mono);padding:3px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--blue)}
+.lqgrid{display:grid;grid-template-columns:minmax(200px,280px) 1fr;gap:20px;align-items:start;margin:12px 0}
+.mans{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));margin-bottom:12px}
+.mf{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}
+.mf .row{display:flex;align-items:center;gap:8px}
+.mf input,.mf select{width:100%;min-width:0}
+.mf .u{font:500 .95rem var(--font-mono);color:var(--muted);white-space:nowrap}
+.mf input.ok{outline:2px solid var(--accent)}
+.mf input.bad,.mf select.bad{outline:2px solid var(--red)}
+.mf select.ok{outline:2px solid var(--accent)}
+.hero{border-left:6px solid var(--accent)}
+.checks{display:flex;flex-wrap:wrap;gap:6px 18px;margin:4px 0 10px}
+.checks label{display:flex;gap:8px;align-items:center;font-size:.92rem;cursor:pointer}
+.mini{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.mini .calc{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px}
+.mini h3{margin:0 0 10px;font-size:1rem}
+.mini .r{font:600 1rem var(--font-mono);color:var(--red);margin-top:8px}
+@media (max-width:700px){.lqgrid{grid-template-columns:1fr}}
+</style>
+<div class="app">
+<aside class="side">
+  <a class="brand" href="#inicio" aria-label="Bancada N2, início">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="32" height="32" rx="8" fill="var(--accent)"/><path d="M8 17h7M15 10v14M15 15l8-5M15 19l8 5M23 10v-2M23 24v2" stroke="var(--on-accent)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    <span>Bancada N2</span>
+  </a>
+  <div class="navgrp">Conteúdo</div>
+  <nav class="nav" aria-label="Seções">
+    <a href="#inicio" data-go="inicio">Início</a>
+    <a href="#lista" data-go="lista"><span class="n">★</span>Lista N2</a>
+    <a href="#tbj" data-go="tbj"><span class="n">8</span>Transistor bipolar</a>
+    <a href="#polarizacao" data-go="polarizacao"><span class="n">9</span>Polarização do TBJ</a>
+    <a href="#divisor" data-go="divisor"><span class="n">9</span>Divisor de tensão</a>
+    <a href="#chave" data-go="chave"><span class="n">8</span>TBJ como chave</a>
+    <a href="#jfet" data-go="jfet"><span class="n">10</span>FET e JFET</a>
+    <a href="#mosfet" data-go="mosfet"><span class="n">11</span>MOSFET</a>
+    <a href="#ampop" data-go="ampop"><span class="n">13</span>Amplificador operacional</a>
+    <a href="#exercicios" data-go="exercicios"><span class="n">✎</span>Exercícios</a>
+    <a href="#cartoes" data-go="cartoes"><span class="n">▤</span>Cartões</a>
+    <a href="#formulas" data-go="formulas"><span class="n">Σ</span>Fórmulas</a>
+  </nav>
+  <div class="themebox">
+    <div class="seg theme-seg" role="group" aria-label="Tema">
+      <button type="button" data-theme-set="auto" aria-pressed="true">Auto</button>
+      <button type="button" data-theme-set="light" aria-pressed="false">Claro</button>
+      <button type="button" data-theme-set="dark" aria-pressed="false">Escuro</button>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ============ INÍCIO ============ -->
+<section class="view" data-view="inicio">
+  <header class="page-head">
+    <p class="eyebrow">Eletrônica · Engenharia da Computação · N2</p>
+    <h1>Bancada N2</h1>
+    <p class="lede">TBJ, FET, MOSFET e amplificadores operacionais para a prova. Leia o resumo, mexa nos simuladores e resolva exercícios cujos números mudam a cada tentativa.</p>
+  </header>
+
+  <div class="grid3">
+    <div class="meter"><div class="k">Seções visitadas</div><div class="v" id="mVisV">0/8</div><div class="bar"><i id="mVisB"></i></div></div>
+    <div class="meter"><div class="k">Exercícios dominados</div><div class="v" id="mExV">0/0</div><div class="bar"><i id="mExB"></i></div></div>
+    <div class="meter"><div class="k">Cartões que você sabe</div><div class="v" id="mCdV">0/0</div><div class="bar"><i id="mCdB"></i></div></div>
+  </div>
+
+  <div class="card hero">
+    <h2>Foco da N2: a Lista N2 do professor</h2>
+    <p>São 9 questões: 7 de polarização do TBJ (base constante, emissor e divisor de tensão) e 2 de amplificador operacional. Cada uma tem o gabarito, a resolução passo a passo e variantes com números novos.</p>
+    <p><a class="btn primary" href="#lista" style="display:inline-block;text-decoration:none">Abrir a Lista N2</a></p>
+  </div>
+
+  <div class="card">
+    <h2>Mapa do conteúdo</h2>
+    <p>O professor passou os itens 8, 10 e 11 em slides e videoaulas. O item 9 veio pelas fotos do quadro e pela Lista N2, e os itens 13 e 14 por dois materiais de amplificador operacional. Só o item 12 continua sem material.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Item</th><th>Conteúdo programático</th><th>Onde estudar</th><th>Situação</th></tr></thead>
+      <tbody>
+        <tr><td class="m">8</td><td>Características e aplicações dos transistores bipolares</td><td><a href="#tbj">Transistor bipolar</a> · <a href="#chave">TBJ como chave</a></td><td><span class="badge b-ok">Coberto</span></td></tr>
+        <tr><td class="m">9</td><td>Amplificadores com TBJ e suas aplicações</td><td><a href="#polarizacao">Polarização do TBJ</a> · <a href="#divisor">Divisor de tensão</a></td><td><span class="badge b-ok">Coberto</span></td></tr>
+        <tr><td class="m">10</td><td>Transistor de efeito de campo (FET): estrutura e polarização</td><td><a href="#jfet">FET e JFET</a></td><td><span class="badge b-ok">Coberto</span></td></tr>
+        <tr><td class="m">11</td><td>Características dos transistores MOSFET</td><td><a href="#mosfet">MOSFET</a></td><td><span class="badge b-ok">Coberto</span></td></tr>
+        <tr><td class="m">12</td><td>Amplificadores com MOSFET e suas aplicações</td><td>Sem material</td><td><span class="badge b-no">Não passado</span></td></tr>
+        <tr><td class="m">13</td><td>Amplificadores operacionais: conceitos e aplicações</td><td><a href="#ampop">Amplificador operacional</a></td><td><span class="badge b-ok">Coberto</span></td></tr>
+        <tr><td class="m">14</td><td>Circuitos com amplificadores operacionais</td><td><a href="#ampop">Amplificador operacional</a> · <a href="#lista">Lista N2 (Q8 e Q9)</a></td><td><span class="badge b-ok">Coberto</span></td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="card">
+    <h2>Roteiro sugerido</h2>
+    <ol class="road">
+      <li><span><a href="#lista">Lista N2</a>: é o foco. Tente o original, compare com o gabarito e refaça com variantes.</span></li>
+      <li><span><a href="#tbj">Transistor bipolar</a>: regiões de operação, α e β, e a reta de carga.</span></li>
+      <li><span><a href="#polarizacao">Polarização</a> e <a href="#divisor">divisor de tensão</a>: projete RB, RC, RE, RB1 e RB2 a partir do ponto de operação.</span></li>
+      <li><span><a href="#chave">TBJ como chave</a>: saturação forte, relé, reed switch e LDR.</span></li>
+      <li><span><a href="#jfet">FET e JFET</a>: depleção, pinch-off, IDSS e autopolarização.</span></li>
+      <li><span><a href="#mosfet">MOSFET</a>: depleção x enriquecimento e o método supor, calcular, verificar.</span></li>
+      <li><span><a href="#ampop">Amplificador operacional</a>: inversor, não inversor, somador, subtrator e saturação.</span></li>
+      <li><span><a href="#exercicios">Exercícios</a>: faça o simulado e refaça as que errar.</span></li>
+      <li><span><a href="#cartoes">Cartões</a>: revise na véspera da prova.</span></li>
+    </ol>
+  </div>
+
+  <div class="note n-amber">
+    <p><b>Cuidado com o VBE.</b> Nas fotos do quadro o professor usa 0,6 V, mas a Lista N2 e os slides usam 0,7 V. Os exercícios gerais deste site usam 0,6 V, e a Lista N2 usa o valor do enunciado. Ele também arredonda resistores para valores comerciais, como 1140 Ω para 1k2.</p>
+  </div>
+
+  <div class="themebox mobile">
+    <div class="seg theme-seg" role="group" aria-label="Tema">
+      <button type="button" data-theme-set="auto" aria-pressed="true">Auto</button>
+      <button type="button" data-theme-set="light" aria-pressed="false">Claro</button>
+      <button type="button" data-theme-set="dark" aria-pressed="false">Escuro</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TBJ ============ -->
+<section class="view" data-view="tbj" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Item 8 · Transistor bipolar de junção</p>
+    <h1>Transistor bipolar</h1>
+    <p class="lede">Três terminais, duas junções. Uma corrente pequena na base controla uma corrente grande entre coletor e emissor.</p>
+  </header>
+
+  <div class="card">
+    <h2>Estrutura</h2>
+    <div class="grid2">
+      <div>
+        <ul class="tight">
+          <li><b>Emissor (E):</b> muito dopado. Injeta portadores na base.</li>
+          <li><b>Base (B):</b> pouco dopada e muito fina. Deixa quase todos os portadores passarem.</li>
+          <li><b>Coletor (C):</b> a região maior, que recolhe os portadores. Por isso dissipa mais calor.</li>
+          <li>O símbolo tem uma seta no emissor: no <b>NPN</b> aponta para fora, no <b>PNP</b> aponta para dentro.</li>
+        </ul>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 420 150" role="img" aria-label="Estruturas NPN e PNP como dois diodos em oposição">
+          <g class="lbl">
+            <text x="10" y="22" class="st">NPN</text>
+            <rect class="blk" x="60" y="10" width="90" height="38"/><rect class="blk" x="150" y="10" width="50" height="38"/><rect class="blk" x="200" y="10" width="90" height="38"/>
+            <text x="105" y="34" text-anchor="middle">N</text><text x="175" y="34" text-anchor="middle">P</text><text x="245" y="34" text-anchor="middle">N</text>
+            <text x="105" y="64" text-anchor="middle" class="st">C</text><text x="175" y="64" text-anchor="middle" class="st">B</text><text x="245" y="64" text-anchor="middle" class="st">E</text>
+            <text x="320" y="34">N P N: seta para fora</text>
+            <text x="10" y="102" class="st">PNP</text>
+            <rect class="blk" x="60" y="90" width="90" height="38"/><rect class="blk" x="150" y="90" width="50" height="38"/><rect class="blk" x="200" y="90" width="90" height="38"/>
+            <text x="105" y="114" text-anchor="middle">P</text><text x="175" y="114" text-anchor="middle">N</text><text x="245" y="114" text-anchor="middle">P</text>
+            <text x="105" y="144" text-anchor="middle" class="st">C</text><text x="175" y="144" text-anchor="middle" class="st">B</text><text x="245" y="144" text-anchor="middle" class="st">E</text>
+            <text x="320" y="114">P N P: seta para dentro</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <p>Vistas como diodos, as duas junções ficam em oposição: base-coletor (BC) e base-emissor (BE). A junção BE só conduz perto de <span class="k-red">0,6 V</span> (silício, valor do professor).</p>
+  </div>
+
+  <div class="card">
+    <h2>As três regiões de operação</h2>
+    <p>Escolha uma região e veja como cada junção está polarizada.</p>
+    <div class="seg" id="regTabs" role="group" aria-label="Região de operação">
+      <button type="button" data-reg="corte" aria-pressed="false">Corte</button>
+      <button type="button" data-reg="ativa" aria-pressed="true">Ativa</button>
+      <button type="button" data-reg="sat" aria-pressed="false">Saturação</button>
+    </div>
+    <div class="regview">
+      <div class="fig">
+        <svg viewBox="0 0 420 250" role="img" aria-label="Transistor NPN com a polarização de cada junção">
+          <defs>
+            <marker id="ahR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#C42E27"/></marker>
+            <marker id="ahB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2B5FD9"/></marker>
+          </defs>
+          <rect class="blk" x="30" y="90" width="130" height="64"/><rect class="blk" x="160" y="90" width="70" height="64"/><rect class="blk" x="230" y="90" width="130" height="64"/>
+          <text class="st" x="95" y="140" text-anchor="middle">N · coletor</text><text class="st" x="195" y="140" text-anchor="middle">P</text><text class="st" x="295" y="140" text-anchor="middle">N · emissor</text>
+          <text class="st" x="95" y="176" text-anchor="middle">C</text><text class="st" x="195" y="176" text-anchor="middle">B</text><text class="st" x="295" y="176" text-anchor="middle">E</text>
+          <line class="wire" x1="195" y1="154" x2="195" y2="184" style="display:none"/>
+          <path id="regIb" d="M195 240V196" stroke="#2B5FD9" stroke-width="3" fill="none" marker-end="url(#ahB)"/>
+          <text class="lbl" x="206" y="230">IB</text>
+          <path id="regFlow" d="M330 78H60" stroke="#C42E27" stroke-width="4" fill="none" marker-end="url(#ahR)"/>
+          <text class="lbl" x="195" y="62" text-anchor="middle" id="regFlowT">elétrons do emissor ao coletor</text>
+          <rect x="136" y="98" width="48" height="22" rx="11" id="jbcR" fill="#C42E27"/><text id="jbcT" class="st" x="160" y="113" text-anchor="middle" style="fill:#fff">BC</text>
+          <rect x="206" y="98" width="48" height="22" rx="11" id="jbeR" fill="#0C6648"/><text id="jbeT" class="st" x="230" y="113" text-anchor="middle" style="fill:#fff">BE</text>
+        </svg>
+      </div>
+      <div>
+        <h3 id="regTitle">Região ativa</h3>
+        <p id="regDesc"></p>
+        <ul class="tight" id="regList"></ul>
+      </div>
+    </div>
+    <div class="legend" style="margin-top:12px"><span><i style="border-color:var(--accent)"></i>junção direta</span><span><i style="border-color:var(--red)"></i>junção reversa</span></div>
+    <div class="note n-blue" style="margin-top:14px"><p><b>Efeito transistor.</b> Na região ativa, a junção BC está reversa e mesmo assim passa corrente: os elétrons injetados pelo emissor atravessam a base fina e chegam ao coletor. Mais de 95% chegam ao coletor e menos de 5% saem pela base.</p></div>
+  </div>
+
+  <div class="card">
+    <h2>Correntes, α e β</h2>
+    <div class="grid2">
+      <div>
+        <span class="eq">I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub></span>
+        <span class="eq">V<sub>CE</sub> = V<sub>CB</sub> + V<sub>BE</sub></span>
+        <ul class="tight">
+          <li><b>α</b> = I<sub>C</sub>/I<sub>E</sub>, entre 0,9 e 0,99. Sempre menor que 1.</li>
+          <li><b>β</b> (h<sub>FE</sub>) = I<sub>C</sub>/I<sub>B</sub>, o ganho de corrente. Costuma passar de 20.</li>
+          <li><span class="eq">α = β/(β+1)</span><span class="eq">β = α/(1−α)</span></li>
+        </ul>
+        <p>O β varia com a temperatura e com a corrente de coletor. Por isso a polarização deve evitar depender dele.</p>
+      </div>
+      <div class="sim" id="simAB" style="grid-template-columns:minmax(0,1fr)">
+        <div class="ctrl">
+          <label class="field"><span>β <b></b></span><input type="range" id="abBeta" min="20" max="400" step="1" value="110" data-d="0"></label>
+          <label class="field"><span>I<sub>B</sub> <b></b></span><input type="range" id="abIb" min="10" max="500" step="5" value="100" data-d="0" data-u="µA"></label>
+        </div>
+        <div class="ro">
+          <div><div class="k">I<sub>C</sub></div><div class="v" id="abIc"></div></div>
+          <div><div class="k">I<sub>E</sub></div><div class="v" id="abIe"></div></div>
+          <div><div class="k">α</div><div class="v" id="abAl"></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="mono" style="font-size:.9rem;color:var(--muted)">Exemplo do slide: BC548 com β = 110 e I<sub>B</sub> = 100 µA dá I<sub>C</sub> = 11 mA.</p>
+  </div>
+
+  <div class="card" id="simB">
+    <h2>Curvas de saída e reta de carga</h2>
+    <p>O ponto de operação (Q) é onde a reta de carga cruza a curva da corrente de base escolhida. Aumente I<sub>B</sub> até passar do mínimo para saturar.</p>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>V<sub>CC</sub> <b></b></span><input type="range" id="sbVcc" min="5" max="24" step="1" value="15" data-d="0" data-u="V"></label>
+        <label class="field"><span>R<sub>C</sub> <b></b></span><input type="range" id="sbRc" min="20" max="1000" step="10" value="150" data-d="0" data-u="Ω"></label>
+        <label class="field"><span>β <b></b></span><input type="range" id="sbBeta" min="50" max="300" step="10" value="100" data-d="0"></label>
+        <label class="field"><span>I<sub>B</sub> <b></b></span><input type="range" id="sbIb" min="0" max="5" step="0.05" value="0.5" data-d="2" data-u="mA"></label>
+      </div>
+      <div class="viz">
+        <div class="plot fig" id="sbPlot"></div>
+        <div class="legend"><span><i style="border-color:var(--blue)"></i>curvas de I<sub>B</sub></span><span><i style="border-color:var(--accent);border-top-style:dashed"></i>I<sub>B</sub> escolhida</span><span><i style="border-color:var(--red)"></i>reta de carga</span></div>
+        <div class="ro">
+          <div><div class="k">Região</div><div class="v"><span class="badge" id="sbReg"></span></div></div>
+          <div><div class="k">I<sub>C</sub></div><div class="v" id="sbIc"></div></div>
+          <div><div class="k">V<sub>CE</sub></div><div class="v" id="sbVce"></div></div>
+          <div><div class="k">V<sub>RC</sub></div><div class="v" id="sbVrc"></div></div>
+          <div><div class="k">P<sub>D</sub> = I<sub>C</sub>·V<sub>CE</sub></div><div class="v" id="sbPd"></div></div>
+          <div><div class="k">I<sub>B</sub> mínimo p/ saturar</div><div class="v" id="sbIbs"></div></div>
+        </div>
+        <p id="sbMsg"></p>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:.9rem">Modelo ideal: na saturação V<sub>CE</sub> ≈ 0, como nas contas do professor. As curvas têm um joelho suavizado só para o desenho.</p>
+  </div>
+
+  <div class="card">
+    <h2>Dissipação de potência</h2>
+    <span class="eq res">P<sub>D</sub> = I<sub>C</sub> · V<sub>CE</sub></span>
+    <p>Exemplo: I<sub>C</sub> = 100 mA e V<sub>CE</sub> = 5 V dão P<sub>D</sub> = 0,5 W. O calor sai principalmente pelo coletor, e o encapsulamento depende da potência: <b>baixa</b> (corpo pequeno), <b>média</b> (furo para parafusar dissipador) e <b>alta</b> (corpo grande, sempre com dissipador). A pasta térmica entre o dissipador e o transistor melhora a troca de calor.</p>
+    <p><a class="btn primary" href="#exercicios" data-topic="tbj" style="display:inline-block;text-decoration:none">Praticar TBJ</a></p>
+  </div>
+</section>
+
+<!-- ============ POLARIZAÇÃO ============ -->
+<section class="view" data-view="polarizacao" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Item 9 · parcial</p>
+    <h1>Polarização do TBJ</h1>
+    <p class="lede">Polarizar é escolher resistores para que o transistor fique no ponto de operação desejado. Esta parte veio das fotos do quadro, e é o pré-requisito de qualquer amplificador.</p>
+  </header>
+
+  <div class="card">
+    <h2>Receita de projeto</h2>
+    <div class="grid2">
+      <div>
+        <h3 style="margin-top:0">Corrente de base constante</h3>
+        <ol class="tight">
+          <li>Leia IC, VCE e IB do ponto de operação.</li>
+          <li><span class="eq">V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub></span></li>
+          <li><span class="eq res">R<sub>B</sub> = V<sub>RB</sub> / I<sub>B</sub></span></li>
+          <li><span class="eq">V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub></span></li>
+          <li><span class="eq res">R<sub>C</sub> = V<sub>RC</sub> / I<sub>C</sub></span></li>
+        </ol>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Corrente de emissor constante</h3>
+        <p>Acrescenta RE no emissor. Regra do quadro: V<sub>RE</sub> ≈ 10% de V<sub>CC</sub>.</p>
+        <span class="eq res">R<sub>E</sub> = 0,1·V<sub>CC</sub> / I<sub>E</sub></span>
+        <span class="eq res">R<sub>B</sub> = (0,9·V<sub>CC</sub> − V<sub>BE</sub>) / I<sub>B</sub></span>
+        <span class="eq res">R<sub>C</sub> = (0,9·V<sub>CC</sub> − V<sub>CE</sub>) / I<sub>C</sub></span>
+        <p>O RE ajuda a manter o ponto estável quando o β muda.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="simPol">
+    <h2>Projetista de polarização</h2>
+    <p>Digite os dados do ponto de operação ou carregue um exemplo do quadro. Os passos aparecem na ordem da receita.</p>
+    <div class="chips" id="plEx" style="margin-bottom:14px">
+      <button class="chip" type="button" data-ex="1">Quadro 1 · base, 20 V</button>
+      <button class="chip" type="button" data-ex="2">Quadro 2 · base, 15 V</button>
+      <button class="chip" type="button" data-ex="3">Quadro 3 · base, 15 V</button>
+      <button class="chip" type="button" data-ex="4">Quadro 4 · emissor, BC547</button>
+    </div>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>Tipo</span><select id="polMode"><option value="base">Corrente de base constante</option><option value="emissor">Corrente de emissor constante</option></select></label>
+        <label class="field"><span>V<sub>CC</sub> (V)</span><input type="number" id="plVcc" step="any" value="20"></label>
+        <label class="field"><span>I<sub>C</sub> (mA)</span><input type="number" id="plIc" step="any" value="300"></label>
+        <label class="field"><span>V<sub>CE</sub> (V)</span><input type="number" id="plVce" step="any" value="8"></label>
+        <label class="field only-base"><span>I<sub>B</sub> (mA)</span><input type="number" id="plIb" step="any" value="3"></label>
+        <label class="field only-em" hidden><span>β (h<sub>FE</sub>)</span><input type="number" id="plBeta" step="any" value="110"></label>
+        <p style="color:var(--muted);font-size:.88rem;margin:0">V<sub>BE</sub> = 0,6 V fixo.</p>
+      </div>
+      <div class="viz">
+        <div class="fig">
+          <svg viewBox="0 0 340 300" role="img" aria-label="Circuito de polarização com valores calculados">
+            <text class="st" x="170" y="14" text-anchor="middle" id="cVCC">VCC</text>
+            <path class="wire" d="M90 24H250M90 24V40M250 24V40"/>
+            <path class="wire" d="M90 40v10l-10 6 20 12-20 12 20 12-10 6v10"/>
+            <path class="wire" d="M90 108V160H195"/>
+            <path class="wire" d="M250 40v10l-10 6 20 12-20 12 20 12-10 6v10V130L195 152"/>
+            <path class="wire" d="M195 138V182"/>
+            <path class="wire" d="M195 168L250 190"/>
+            <polygon points="246,188.4 235.2,188.4 238.2,181" fill="var(--ink)"/>
+            <g id="gNoRE"><path class="wire" d="M250 190V232"/><path class="wire" d="M232 232h36M238 238h24M244 244h12"/></g>
+            <g id="gRE" hidden><path class="wire" d="M250 190V200l-10 6 20 12-20 12 20 12-10 6V262"/><path class="wire" d="M232 262h36M238 268h24M244 274h12"/></g>
+            <text class="st" x="68" y="78" text-anchor="end" id="cRB">RB</text>
+            <text class="st" x="272" y="78" id="cRC">RC</text>
+            <text class="st" x="272" y="236" id="cRE" hidden>RE</text>
+            <text class="lbl" x="118" y="152" id="cIB">IB</text>
+            <text class="lbl" x="262" y="124" id="cIC">IC</text>
+            <text class="lbl" x="150" y="206" id="cVCE" style="fill:var(--red)">VCE</text>
+          </svg>
+        </div>
+        <ol class="steps" id="plSteps"></ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="note n-blue">
+    <p><b>No quadro, IE ≈ IC.</b> Para emissor constante o professor usa IE no lugar de IC no cálculo de RE. A diferença é IB, pequena perto de IC.</p>
+  </div>
+  <p><a class="btn primary" href="#exercicios" data-topic="pol" style="display:inline-block;text-decoration:none">Praticar polarização</a></p>
+</section>
+
+<!-- ============ CHAVE ============ -->
+<section class="view" data-view="chave" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Item 8 · aplicações</p>
+    <h1>TBJ como chave</h1>
+    <p class="lede">Saturado, o transistor é uma chave fechada. Em corte, uma chave aberta. A diferença para a chave mecânica é que um sinal elétrico a aciona.</p>
+  </header>
+
+  <div class="card">
+    <h2>Como funciona</h2>
+    <div class="grid2">
+      <div>
+        <ul class="tight">
+          <li><b>Corte:</b> IB = 0, IC ≈ 0 e <span class="k-red">V<sub>CE</sub> ≈ V<sub>CC</sub></span>. Toda a tensão cai no transistor.</li>
+          <li><b>Saturação:</b> IC máximo, <span class="k-red">V<sub>CE</sub> ≈ 0</span>. Toda a tensão cai na carga.</li>
+          <li><b>Saturação forte:</b> garante saturar mesmo com β baixo. Regra de projeto: <span class="eq res">I<sub>B</sub> = I<sub>C</sub> / 10</span></li>
+        </ul>
+      </div>
+      <div class="scroll"><table>
+        <thead><tr><th></th><th>Vantagens</th><th>Desvantagens</th></tr></thead>
+        <tbody><tr><td><b>Eletrônica</b></td><td>Sem desgaste, sem arco, muito rápida</td><td>Pequena queda de tensão, fuga de nA, dissipa calor</td></tr></tbody>
+      </table></div>
+    </div>
+    <h3>Reta de carga da chave</h3>
+    <span class="eq">I<sub>C(sat)</sub> ≈ V<sub>CC</sub> / R<sub>C</sub></span>
+    <span class="eq">V<sub>CE(corte)</sub> ≈ V<sub>CC</sub></span>
+    <span class="eq">I<sub>B</sub> = (V<sub>BB</sub> − V<sub>BE</sub>) / R<sub>B</sub></span>
+  </div>
+
+  <div class="card" id="simSw">
+    <h2>Projeto da chave</h2>
+    <p>Do exercício do quadro: V<sub>CC</sub> = 12 V, carga de 100 mA e β = 100 dão R<sub>B</sub> = 1140 Ω, que vira 1k2.</p>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>V<sub>CC</sub> (V)</span><input type="number" id="swVcc" step="any" value="12"></label>
+        <label class="field"><span>I<sub>C</sub> da carga (mA)</span><input type="number" id="swIc" step="any" value="100"></label>
+        <label class="field"><span>β</span><input type="number" id="swBeta" step="any" value="100"></label>
+        <label class="field"><span>R<sub>B</sub> usado (Ω)</span><input type="number" id="swRbUse" step="any" value="1200"></label>
+      </div>
+      <div class="viz">
+        <ol class="steps" id="swSteps"></ol>
+        <div class="fig">
+          <svg viewBox="0 0 360 210" role="img" aria-label="Lâmpada acionada por transistor">
+            <path class="wire" d="M240 24V59M240 111V128M205 128V168M205 140L240 128M205 156L240 168M240 168V185M120 148H80M112 148H140M180 148H205"/>
+            <polygon points="238,167.4 227.2,168 229.8,160.4" fill="var(--ink)"/>
+            <path class="wire" d="M226 185h28M232 191h16M237 197h6"/>
+            <rect x="140" y="140" width="40" height="16" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>
+            <circle id="lpGlow" cx="240" cy="85" r="46" fill="#FFD84D" opacity="0"/>
+            <circle cx="240" cy="85" r="26" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>
+            <circle id="lpLamp" cx="240" cy="85" r="26" fill="#FFD84D" opacity="0"/>
+            <path d="M227 72l26 26M253 72l-26 26" stroke="var(--ink)" stroke-width="2"/>
+            <line id="lpSw" x1="80" y1="148" x2="110" y2="132" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="80" cy="148" r="3" fill="var(--ink)"/><circle cx="112" cy="148" r="3" fill="var(--ink)"/>
+            <text class="st" x="240" y="16" text-anchor="middle">VCC</text>
+            <text class="lbl" x="276" y="88">carga</text>
+            <text class="lbl" x="160" y="134" text-anchor="middle">RB</text>
+            <text class="lbl" x="72" y="152" text-anchor="end">VBB</text>
+            <text class="st" id="lpVceT" x="256" y="152">VCE</text>
+          </svg>
+        </div>
+        <div class="dbar">
+          <button class="btn primary" type="button" id="lpBtn" aria-pressed="false">Pressionar a chave</button>
+          <span class="badge b-corte" id="lpReg">Corte</span>
+        </div>
+        <div class="ro">
+          <div><div class="k">I<sub>B</sub></div><div class="v" id="lpIb"></div></div>
+          <div><div class="k">I<sub>C</sub></div><div class="v" id="lpIc"></div></div>
+          <div><div class="k">V<sub>CE</sub></div><div class="v" id="lpVc"></div></div>
+        </div>
+        <p id="lpMsg"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Aplicações: relé, reed switch e LDR</h2>
+    <p>Mude o estímulo e veja a cadeia de causa e efeito. Cada caixa acesa está ativa.</p>
+    <div class="grid2">
+      <div class="flowcard" id="flowRele"></div>
+      <div class="flowcard" id="flowReed"></div>
+    </div>
+    <div class="flowcard" id="flowLdr" style="margin-top:18px"></div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="note"><p><b>Relé.</b> Chave mecânica acionada por campo eletromagnético. Terminais: comum, NF (normalmente fechado), NA (normalmente aberto) e os dois da bobina. A bobina fica no coletor do transistor NPN.</p></div>
+      <div class="note n-red"><p><b>Diodo em antiparalelo com a bobina.</b> Cargas indutivas geram um pico de tensão ao desligar. O diodo dá um caminho para essa corrente e protege o transistor.</p></div>
+    </div>
+    <div class="note n-amber" style="margin-top:18px"><p><b>Circuito 2 do slide (LED em paralelo com o transistor) inverte a lógica.</b> Chave aberta: transistor em corte e o LED acende. Chave fechada: transistor saturado desvia a corrente e o LED apaga.</p></div>
+  </div>
+  <p><a class="btn primary" href="#exercicios" data-topic="chave" style="display:inline-block;text-decoration:none">Praticar chave</a></p>
+</section>
+
+<!-- ============ JFET ============ -->
+<section class="view" data-view="jfet" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Item 10 · Transistor de efeito de campo</p>
+    <h1>FET e JFET</h1>
+    <p class="lede">O FET controla a corrente com uma tensão na porta, e não com uma corrente. Por isso a impedância de entrada é muito alta.</p>
+  </header>
+
+  <div class="card">
+    <h2>TBJ x FET</h2>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>TBJ</th><th>FET</th></tr></thead>
+      <tbody>
+        <tr><td><b>Terminais</b></td><td>Emissor, base, coletor</td><td>Fonte (S), porta (G), dreno (D)</td></tr>
+        <tr><td><b>Controle</b></td><td>Corrente de base</td><td>Tensão porta-fonte (V<sub>GS</sub>)</td></tr>
+        <tr><td><b>Impedância de entrada</b></td><td>Baixa</td><td>Muito alta</td></tr>
+        <tr><td><b>Portadores</b></td><td>Dois tipos (bipolar)</td><td>Um tipo (unipolar)</td></tr>
+      </tbody></table></div>
+    <p>A família FET tem dois ramos: o <b>JFET</b> (de junção) e o <b>MOSFET</b> (porta isolada, item 11). Ambos existem com canal N ou canal P. Usa-se o FET nos estágios de entrada de instrumentos, como osciloscópios.</p>
+  </div>
+
+  <div class="card" id="simJ">
+    <h2>JFET em funcionamento</h2>
+    <p>Aumente |V<sub>GS</sub>|: a região de depleção cresce e o canal estreita. Em |V<sub>GS</sub>| = V<sub>P</sub> o canal fecha e I<sub>D</sub> vai a zero. Os slides usam canal P, então os sinais aparecem invertidos. Aqui, tudo em módulo.</p>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>I<sub>DSS</sub> <b></b></span><input type="range" id="sjIdss" min="2" max="12" step="0.5" value="6" data-d="1" data-u="mA"></label>
+        <label class="field"><span>V<sub>P</sub> (módulo) <b></b></span><input type="range" id="sjVp" min="2" max="8" step="0.5" value="4" data-d="1" data-u="V"></label>
+        <label class="field"><span>|V<sub>GS</sub>| <b></b></span><input type="range" id="sjVgs" min="0" max="4" step="0.1" value="1" data-d="1" data-u="V"></label>
+        <label class="field"><span>V<sub>DS</sub> <b></b></span><input type="range" id="sjVds" min="0" max="8" step="0.1" value="6" data-d="1" data-u="V"></label>
+      </div>
+      <div class="viz">
+        <div class="fig" id="sjXs"></div>
+        <div class="ro">
+          <div><div class="k">Região</div><div class="v"><span class="badge" id="sjReg"></span></div></div>
+          <div><div class="k">I<sub>D</sub></div><div class="v" id="sjId"></div></div>
+          <div><div class="k">V<sub>DS</sub> de pinçamento</div><div class="v" id="sjVdsp"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="plots2" style="margin-top:16px">
+      <div><div class="plot fig" id="sjOut"></div><div class="legend" style="margin-top:6px"><span><i style="border-color:var(--blue)"></i>curvas por |V<sub>GS</sub>|</span><span><i style="border-color:var(--red);border-top-style:dotted"></i>pinch-off</span></div></div>
+      <div><div class="plot fig" id="sjTr"></div><p style="color:var(--muted);font-size:.88rem;margin:6px 0 0">Transferência na saturação: o ponto mostra I<sub>D</sub>(sat) para o |V<sub>GS</sub>| escolhido.</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>O que acontece em cada região</h2>
+    <ul class="tight">
+      <li><b>Corrente de porta ≈ 0.</b> Só há uma junção PN polarizada reversamente. Se a junção fosse polarizada diretamente, a corrente de porta apareceria e a impedância cairia.</li>
+      <li><b>Região ôhmica:</b> I<sub>D</sub> cresce com V<sub>DS</sub>, como num resistor controlado pela porta.</li>
+      <li><b>Saturação (corrente constante):</b> o canal pinça perto do dreno e I<sub>D</sub> quase não muda com V<sub>DS</sub>. Com V<sub>GS</sub> = 0 essa corrente é <b>I<sub>DSS</sub></b>.</li>
+      <li><b>Ruptura (BV<sub>DSS</sub>):</b> com V<sub>DS</sub> muito alto, a porta rompe e I<sub>D</sub> dispara. Limite a corrente com um resistor.</li>
+    </ul>
+    <span class="eq res">I<sub>D</sub> = I<sub>DSS</sub> (1 − V<sub>GS</sub>/V<sub>P</sub>)²</span>
+    <span class="eq">V<sub>DS(P)</sub> = |V<sub>P</sub>| − |V<sub>GS</sub>|</span>
+    <p>Exemplo do slide: com V<sub>P</sub> = −8 V e V<sub>SG</sub> = 2 V, o pinçamento ocorre em V<sub>SD(P)</sub> = 8 − 2 = 6 V. Dados de folha: BF245A com I<sub>DSS</sub> = 4 mA, V<sub>P</sub> = 2 V e V<sub>DS</sub> máx. = 20 V; MPF102 com P<sub>D</sub> máx. = 200 mW, I<sub>DSS</sub> = 6 mA e V<sub>P</sub> = 8 V.</p>
+  </div>
+
+  <div class="card" id="simJb">
+    <h2>Projeto de autopolarização</h2>
+    <p>Com um resistor RS na fonte e RG de 1 MΩ na porta, a corrente de dreno cria uma tensão em RS que polariza a porta. Receita do quadro:</p>
+    <span class="eq res">R<sub>S</sub> = V<sub>P</sub> / I<sub>DSS</sub></span>
+    <span class="eq">V<sub>RS</sub> = I<sub>D</sub>·R<sub>S</sub></span>
+    <span class="eq res">R<sub>D</sub> = (V<sub>CC</sub> − V<sub>DS</sub> − V<sub>RS</sub>) / I<sub>D</sub></span>
+    <div class="chips" id="jbEx" style="margin:12px 0">
+      <button class="chip" type="button" data-ex="1">MPF102 · 14 V</button>
+      <button class="chip" type="button" data-ex="2">Outro exemplo · 12 V</button>
+    </div>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>V<sub>CC</sub> (V)</span><input type="number" id="jbVcc" step="any" value="14"></label>
+        <label class="field"><span>V<sub>DS</sub> (V)</span><input type="number" id="jbVds" step="any" value="7.5"></label>
+        <label class="field"><span>I<sub>D</sub> (mA)</span><input type="number" id="jbId" step="any" value="4"></label>
+        <label class="field"><span>V<sub>P</sub> (V)</span><input type="number" id="jbVp" step="any" value="8"></label>
+        <label class="field"><span>I<sub>DSS</sub> (mA)</span><input type="number" id="jbIdss" step="any" value="6"></label>
+      </div>
+      <div class="viz"><ol class="steps" id="jbSteps"></ol></div>
+    </div>
+  </div>
+  <p><a class="btn primary" href="#exercicios" data-topic="jfet" style="display:inline-block;text-decoration:none">Praticar JFET</a></p>
+</section>
+
+<!-- ============ MOSFET ============ -->
+<section class="view" data-view="mosfet" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Item 11 · MOSFET</p>
+    <h1>MOSFET</h1>
+    <p class="lede">É um FET com a porta isolada do canal por uma camada de óxido. A impedância de entrada fica altíssima, e por isso ele é a base dos circuitos integrados.</p>
+  </header>
+
+  <div class="card">
+    <h2>Terminais e tipos</h2>
+    <ul class="tight">
+      <li><b>Dreno (D), porta (G), fonte (S) e substrato (B).</b> O substrato costuma ser ligado à fonte, e o componente é usado como se tivesse três terminais.</li>
+      <li>Porta, óxido e canal formam um <b>capacitor</b>: a tensão na porta induz cargas no canal sem corrente de porta. MOS vem de Metal-Óxido-Silício.</li>
+    </ul>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Depleção</th><th>Enriquecimento</th></tr></thead>
+      <tbody>
+        <tr><td><b>Sem tensão na porta</b></td><td>Já tem canal e <b>conduz</b></td><td>Sem canal e <b>não conduz</b></td></tr>
+        <tr><td><b>Efeito da porta</b></td><td>Uma polaridade estreita o canal, a outra alarga</td><td>Só conduz depois de passar V<sub>T</sub></td></tr>
+        <tr><td><b>Símbolo</b></td><td>Linha cheia entre D e S</td><td>Linha tracejada entre D e S</td></tr>
+      </tbody></table></div>
+    <p>Existem com canal N e canal P. O canal P opera pelos mesmos princípios, com polaridades e sentido da corrente invertidos.</p>
+  </div>
+
+  <div class="card" id="simM">
+    <h2>MOSFET de canal N em funcionamento</h2>
+    <p>Com V<sub>T</sub> positivo o transistor é de enriquecimento. Leve V<sub>T</sub> para valores negativos e ele vira de depleção: já conduz com V<sub>GS</sub> = 0.</p>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>k<sub>n</sub> <b></b></span><input type="range" id="smKn" min="0.5" max="6" step="0.5" value="2" data-d="1" data-u="mA/V²"></label>
+        <label class="field"><span>V<sub>T</sub> <b></b></span><input type="range" id="smVt" min="-3" max="3" step="0.1" value="1" data-d="1" data-u="V"></label>
+        <label class="field"><span>V<sub>GS</sub> <b></b></span><input type="range" id="smVgs" min="-4" max="8" step="0.1" value="3" data-d="1" data-u="V"></label>
+        <label class="field"><span>V<sub>DS</sub> <b></b></span><input type="range" id="smVds" min="0" max="12" step="0.1" value="6" data-d="1" data-u="V"></label>
+      </div>
+      <div class="viz">
+        <div class="fig" id="smXs"></div>
+        <div class="ro">
+          <div><div class="k">Tipo</div><div class="v" id="smType"></div></div>
+          <div><div class="k">Região</div><div class="v"><span class="badge" id="smReg"></span></div></div>
+          <div><div class="k">V<sub>GS</sub> − V<sub>T</sub></div><div class="v" id="smOv"></div></div>
+          <div><div class="k">I<sub>D</sub></div><div class="v" id="smId"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="plots2" style="margin-top:16px">
+      <div><div class="plot fig" id="smOut"></div><div class="legend" style="margin-top:6px"><span><i style="border-color:var(--blue)"></i>curvas por V<sub>GS</sub></span><span><i style="border-color:var(--red);border-top-style:dotted"></i>V<sub>DS</sub> = V<sub>GS</sub> − V<sub>T</sub></span></div></div>
+      <div><div class="plot fig" id="smTr"></div><p style="color:var(--muted);font-size:.88rem;margin:6px 0 0">Transferência na saturação.</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Regiões de operação</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Região</th><th>Condição</th><th>O que acontece</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge b-corte">Corte</span></td><td class="m">v<sub>GS</sub> &lt; V<sub>T</sub></td><td>Sem canal. I<sub>D</sub> = 0.</td></tr>
+        <tr><td><span class="badge b-ativa">Triodo</span></td><td class="m">v<sub>GS</sub> &gt; V<sub>T</sub> e v<sub>DS</sub> &lt; v<sub>GS</sub> − V<sub>T</sub></td><td>Canal contínuo. Age como resistência controlada por v<sub>GS</sub>.</td></tr>
+        <tr><td><span class="badge b-sat">Saturação</span></td><td class="m">v<sub>GS</sub> &gt; V<sub>T</sub> e v<sub>DS</sub> ≥ v<sub>GS</sub> − V<sub>T</sub></td><td>Canal estrangulado. I<sub>D</sub> quase constante. Região usada para amplificar.</td></tr>
+      </tbody></table></div>
+    <span class="eq res">Saturação: I<sub>D</sub> = (k<sub>n</sub>/2)(v<sub>GS</sub> − V<sub>T</sub>)²</span>
+    <span class="eq res">Triodo: I<sub>D</sub> = k<sub>n</sub>[(v<sub>GS</sub> − V<sub>T</sub>)v<sub>DS</sub> − v<sub>DS</sub>²/2]</span>
+    <p style="color:var(--muted);font-size:.9rem">Confira a notação do seu professor: alguns escrevem K no lugar de k<sub>n</sub>/2.</p>
+  </div>
+
+  <div class="card" id="simMs">
+    <h2>Resolvedor: supor, calcular, verificar</h2>
+    <p>O método da videoaula 3: suponha saturação, calcule I<sub>D</sub> e V<sub>DS</sub>, e confira se a suposição vale. Se não valer, refaça em triodo.</p>
+    <div class="chips" id="msEx" style="margin-bottom:14px">
+      <button class="chip" type="button" data-ex="1">Exemplo 1 · R<sub>D</sub> = 1 kΩ</button>
+      <button class="chip" type="button" data-ex="2">Exemplo 2 · R<sub>D</sub> = 2,5 kΩ</button>
+    </div>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>V<sub>DD</sub> (V)</span><input type="number" id="msVdd" step="any" value="10"></label>
+        <label class="field"><span>R<sub>D</sub> (kΩ)</span><input type="number" id="msRd" step="any" value="1"></label>
+        <label class="field"><span>V<sub>GS</sub> (V)</span><input type="number" id="msVgs" step="any" value="3"></label>
+        <label class="field"><span>V<sub>T</sub> (V)</span><input type="number" id="msVt" step="any" value="1"></label>
+        <label class="field"><span>k<sub>n</sub> (mA/V²)</span><input type="number" id="msKn" step="any" value="2"></label>
+      </div>
+      <div class="viz"><ol class="steps" id="msSteps"></ol></div>
+    </div>
+  </div>
+  <div class="note n-amber"><p><b>Atenção aos slides.</b> O slide 3 descreve o MOSFET com canal P, então os sinais parecem trocados em relação à videoaula 3. Na prova, siga a convenção da videoaula (canal N, V<sub>T</sub>). Ao falar do MOSFET de enriquecimento, o slide escreve “tensão negativa” nas duas frases que deveriam ser opostas, um erro de digitação.</p></div>
+  <p><a class="btn primary" href="#exercicios" data-topic="mosfet" style="display:inline-block;text-decoration:none">Praticar MOSFET</a></p>
+</section>
+
+<!-- ============ LISTA N2 ============ -->
+<section class="view" data-view="lista" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Foco da N2</p>
+    <h1>Lista N2</h1>
+    <p class="lede">As 9 questões da lista do professor, com o gabarito dele. Tente o original, confira a resolução passo a passo e depois treine com variantes de números diferentes.</p>
+  </header>
+  <div class="card">
+    <div class="exsum">
+      <div id="lsSum" aria-live="polite"></div>
+      <div class="dbar" style="margin:0">
+        <button class="btn primary" type="button" id="lsAllVar">Variantes de todas</button>
+        <button class="btn" type="button" id="lsAllOrig">Voltar aos originais</button>
+      </div>
+    </div>
+  </div>
+  <div class="note n-amber">
+    <p><b>Atenção ao V<sub>BE</sub>.</b> A lista usa 0,7 V nas questões 1 a 5, e é isso que vale nelas. As questões 6 e 7 não dão V<sub>BE</sub> nem β: o gabarito só fecha com V<sub>BE</sub> = 0,6 V, β = 100, V<sub>RE</sub> = 10% de V<sub>CC</sub> e a corrente de R<sub>B1</sub> igual a I<sub>B2</sub>. Se o professor não informar, use essa convenção.</p>
+  </div>
+  <div class="list" id="lsList"></div>
+</section>
+
+<!-- ============ DIVISOR ============ -->
+<section class="view" data-view="divisor" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Item 9 · polarização por divisor de tensão</p>
+    <h1>Divisor de tensão</h1>
+    <p class="lede">É a polarização mais usada em amplificadores: dois resistores fixam a tensão da base e o R<sub>E</sub> estabiliza o ponto de operação, quase sem depender do β.</p>
+  </header>
+  <div class="card">
+    <h2>Como funciona</h2>
+    <div class="grid2">
+      <div>
+        <p>R<sub>B1</sub> liga a base ao V<sub>CC</sub> e R<sub>B2</sub> liga a base ao terra. Se a corrente do divisor for bem maior que I<sub>B</sub>, a tensão de base fica praticamente fixa. A regra da lista é <span class="eq">I<sub>B2</sub> = 10 · I<sub>B</sub></span></p>
+        <p>Com a base fixa, V<sub>E</sub> = V<sub>B</sub> − V<sub>BE</sub> também fica fixo, então I<sub>E</sub> = V<sub>E</sub>/R<sub>E</sub> não depende do β do transistor.</p>
+      </div>
+      <div class="fig" id="dvFig"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Receita de projeto</h2>
+    <ol class="tight">
+      <li>Corrente de base: <span class="eq">I<sub>B</sub> = I<sub>C</sub> / β</span> e a do divisor: <span class="eq">I<sub>B2</sub> = 10 · I<sub>B</sub></span></li>
+      <li>Tensão no emissor, dada ou 10% de V<sub>CC</sub>: <span class="eq res">R<sub>E</sub> = V<sub>RE</sub> / I<sub>E</sub></span></li>
+      <li>Tensão na base: <span class="eq">V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub></span></li>
+      <li><span class="eq res">R<sub>B2</sub> = V<sub>B</sub> / I<sub>B2</sub></span></li>
+      <li><span class="eq res">R<sub>B1</sub> = (V<sub>CC</sub> − V<sub>B</sub>) / (I<sub>B2</sub> + I<sub>B</sub>)</span>. Muitos gabaritos desprezam I<sub>B</sub> e usam só I<sub>B2</sub>.</li>
+      <li>Coletor: <span class="eq res">R<sub>C</sub> = (V<sub>CC</sub> − V<sub>CE</sub> − V<sub>RE</sub>) / I<sub>C</sub></span>, ou V<sub>RC</sub>/I<sub>C</sub> se a tensão em R<sub>C</sub> for dada.</li>
+    </ol>
+  </div>
+  <div class="card" id="simDv">
+    <h2>Projetista de divisor</h2>
+    <p>Carregue uma questão da lista ou digite os seus dados.</p>
+    <div class="chips" id="dvEx" style="margin-bottom:14px">
+      <button class="chip" type="button" data-ex="5">Lista Q5</button>
+      <button class="chip" type="button" data-ex="6">Lista Q6</button>
+      <button class="chip" type="button" data-ex="7">Lista Q7</button>
+    </div>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>V<sub>CC</sub> (V)</span><input type="number" id="dvVcc" step="any" value="10"></label>
+        <label class="field"><span>I<sub>C</sub> (mA)</span><input type="number" id="dvIc" step="any" value="20"></label>
+        <label class="field"><span>β</span><input type="number" id="dvB" step="any" value="100"></label>
+        <label class="field"><span>V<sub>RE</sub> (V)</span><input type="number" id="dvVre" step="any" value="1"></label>
+        <label class="field"><span>V<sub>BE</sub> (V)</span><select id="dvVbe"><option value="0.7">0,7 V</option><option value="0.6">0,6 V</option></select></label>
+        <label class="field"><span>Dado do coletor</span><select id="dvMode"><option value="vce">V<sub>CE</sub></option><option value="vrc">V<sub>RC</sub></option></select></label>
+        <label class="field"><span id="dvDadoL">V<sub>CE</sub> (V)</span><input type="number" id="dvDado" step="any" value="5"></label>
+        <div class="checks">
+          <label><input type="checkbox" id="dvIbsum" checked> Somar I<sub>B</sub> na corrente de R<sub>B1</sub></label>
+          <label><input type="checkbox" id="dvIesum" checked> Usar I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub></label>
+        </div>
+      </div>
+      <div class="viz"><ol class="steps" id="dvSteps"></ol></div>
+    </div>
+  </div>
+  <div class="note n-blue"><p><b>Duas convenções, os dois valem.</b> Na Q5 o gabarito soma I<sub>B</sub> na corrente de R<sub>B1</sub> e usa I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub>, com V<sub>BE</sub> = 0,7 V. Nas Q6 e Q7 ele despreza I<sub>B</sub>, usa I<sub>E</sub> ≈ I<sub>C</sub> e V<sub>BE</sub> = 0,6 V. A diferença é pequena nos resistores de emissor e grande em R<sub>B1</sub> só quando I<sub>B</sub> pesa.</p></div>
+  <p><a class="btn primary" href="#lista" style="display:inline-block;text-decoration:none">Ir para a Lista N2</a></p>
+</section>
+
+<!-- ============ AMP-OP ============ -->
+<section class="view" data-view="ampop" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Itens 13 e 14 · amplificadores operacionais</p>
+    <h1>Amplificador operacional</h1>
+    <p class="lede">Um circuito integrado de altíssimo ganho que amplifica a diferença entre duas entradas. Com resistores externos ele vira inversor, não inversor, somador, subtrator, buffer ou comparador.</p>
+  </header>
+
+  <div class="card">
+    <h2>Entradas, saída e alimentação</h2>
+    <div class="grid2">
+      <div>
+        <ul class="tight">
+          <li><b>Entrada inversora (−):</b> o sinal sai amplificado e com polaridade invertida.</li>
+          <li><b>Entrada não inversora (+):</b> amplificado e com a mesma polaridade.</li>
+          <li><b>Alimentação simétrica ±V<sub>CC</sub>:</b> no 741, pino 7 é +V<sub>CC</sub> e pino 4 é −V<sub>CC</sub>. O máximo é ±18 V.</li>
+          <li><b>Saturação:</b> a saída não passa de cerca de ±V<sub>CC</sub>. No 741 com ±15 V, a excursão típica é ±14 V.</li>
+          <li><b>Limite de corrente:</b> o 741 entrega no máximo 25 mA na saída.</li>
+        </ul>
+      </div>
+      <div class="scroll"><table>
+        <thead><tr><th>Parâmetro</th><th>Ideal</th><th>Real (741)</th></tr></thead>
+        <tbody>
+          <tr><td>Ganho em malha aberta</td><td class="m">∞</td><td class="m">&gt; 100 000</td></tr>
+          <tr><td>Impedância de entrada</td><td class="m">∞</td><td class="m">2 MΩ</td></tr>
+          <tr><td>Impedância de saída</td><td class="m">0</td><td class="m">75 Ω</td></tr>
+          <tr><td>Largura de banda</td><td class="m">0 a ∞</td><td class="m">f<sub>unit</sub> ≈ 1 MHz</td></tr>
+          <tr><td>RRMC (CMRR)</td><td class="m">∞</td><td class="m">90 dB</td></tr>
+          <tr><td>Tensão de offset</td><td class="m">0</td><td class="m">pequena</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>As duas regras do AO ideal com realimentação negativa</h2>
+    <div class="grid2">
+      <div class="note n-blue"><p><b>1. Corrente nas entradas é zero.</b> A impedância de entrada é infinita, então a corrente que chega por R<sub>1</sub> segue inteira por R<sub>F</sub>.</p></div>
+      <div class="note"><p><b>2. Terra virtual.</b> Com realimentação negativa as tensões das duas entradas ficam iguais. Se a entrada (+) está no terra, a (−) fica em 0 V mesmo sem estar ligada a ele.</p></div>
+    </div>
+    <p>Malha aberta (sem realimentação) o ganho é gigante e a saída satura: é um <b>comparador</b>. Com realimentação negativa o ganho depende só dos resistores externos.</p>
+  </div>
+
+  <div class="card" id="simAo">
+    <h2>Simulador de configurações</h2>
+    <p>Escolha o circuito, mude os valores e veja o ganho, as correntes e o que acontece na saturação.</p>
+    <div class="chips" id="aoTabs" role="group" aria-label="Configuração" style="margin-bottom:14px"></div>
+    <div class="sim">
+      <div class="ctrl">
+        <label class="field"><span>R<sub>1</sub> (kΩ)</span><input type="number" id="aoR1" step="any" value="1" min="0.001"></label>
+        <label class="field" id="aoRfW"><span>R<sub>F</sub> (kΩ)</span><input type="number" id="aoRf" step="any" value="4.7" min="0.001"></label>
+        <label class="field"><span>R<sub>L</sub> (kΩ)</span><input type="number" id="aoRl" step="any" value="10" min="0.001"></label>
+        <label class="field"><span>±V<sub>CC</sub> <b></b></span><input type="range" id="aoVcc" min="5" max="18" step="1" value="15" data-d="0" data-u="V"></label>
+        <label class="field" id="aoV1W"><span><i id="aoL1" style="font-style:normal">V<sub>e</sub></i> <b></b></span><input type="range" id="aoV1" min="-5" max="5" step="0.1" value="1" data-d="1" data-u="V"></label>
+        <label class="field" id="aoV2W" hidden><span><i id="aoL2" style="font-style:normal">V<sub>2</sub></i> <b></b></span><input type="range" id="aoV2" min="-5" max="5" step="0.1" value="1" data-d="1" data-u="V"></label>
+        <label class="field" id="aoV3W" hidden><span><i id="aoL3" style="font-style:normal">V<sub>3</sub></i> <b></b></span><input type="range" id="aoV3" min="-5" max="5" step="0.1" value="1" data-d="1" data-u="V"></label>
+      </div>
+      <div class="viz">
+        <div class="fig" id="aoFig"></div>
+        <div class="plot fig" id="aoPlot"></div>
+        <div class="legend"><span><i style="border-color:var(--blue)"></i>V<sub>S</sub> em função da entrada</span><span><i style="border-color:var(--red);border-top-style:dashed"></i>limites de saturação</span></div>
+        <div class="ro">
+          <div><div class="k">Estado</div><div class="v"><span class="badge" id="aoReg"></span></div></div>
+          <div><div class="k">Ganho A<sub>V</sub></div><div class="v" id="aoAv"></div></div>
+          <div><div class="k">Ganho em dB</div><div class="v" id="aoDb"></div></div>
+          <div><div class="k">V<sub>S</sub></div><div class="v" id="aoVs"></div></div>
+          <div><div class="k">I<sub>F</sub> (em R<sub>F</sub>)</div><div class="v" id="aoIf"></div></div>
+          <div><div class="k">I<sub>L</sub> (na carga)</div><div class="v" id="aoIl"></div></div>
+          <div><div class="k">I<sub>O</sub> do AO</div><div class="v" id="aoIo"></div></div>
+        </div>
+        <ol class="steps" id="aoSteps"></ol>
+        <p id="aoMsg"></p>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:.9rem">Modelo ideal. A saturação usa V<sub>sat</sub> = V<sub>CC</sub> − 1 V, aproximação do 741. Em saturação os cálculos de corrente não valem, como diz o material.</p>
+  </div>
+
+  <div class="card">
+    <h2>Fórmulas de cada configuração</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Circuito</th><th>Ganho / saída</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr><td><b>Inversor</b></td><td class="m">A<sub>V</sub> = −R<sub>F</sub>/R<sub>1</sub> · V<sub>S</sub> = A<sub>V</sub>·V<sub>e</sub></td><td>Entrada em R<sub>1</sub> até a (−), (+) no terra. É o mais usado e o mais estável.</td></tr>
+        <tr><td><b>Não inversor</b></td><td class="m">A<sub>V</sub> = 1 + R<sub>F</sub>/R<sub>1</sub></td><td>Entrada na (+). Ganho nunca menor que 1.</td></tr>
+        <tr><td><b>Seguidor (buffer)</b></td><td class="m">A<sub>V</sub> = 1</td><td>Isola estágios, reforça corrente e casa impedâncias.</td></tr>
+        <tr><td><b>Somador inversor</b></td><td class="m">V<sub>S</sub> = −R<sub>F</sub>(V<sub>1</sub>/R<sub>1</sub> + V<sub>2</sub>/R<sub>2</sub> + V<sub>3</sub>/R<sub>3</sub>)</td><td>Base do misturador de áudio.</td></tr>
+        <tr><td><b>Subtrator</b></td><td class="m">V<sub>S</sub> = (R<sub>F</sub>/R<sub>1</sub>)(V<sub>2</sub> − V<sub>1</sub>)</td><td>Com R<sub>1</sub> = R<sub>2</sub> e R<sub>F</sub> = R<sub>3</sub>. Rejeita sinais em modo comum.</td></tr>
+        <tr><td><b>Comparador</b></td><td class="m">V<sub>S</sub> = +V<sub>sat</sub> se V<sub>+</sub> &gt; V<sub>−</sub>, senão −V<sub>sat</sub></td><td>Sem realimentação. Detector de nível e de passagem por zero.</td></tr>
+        <tr><td><b>Correntes</b></td><td class="m">I<sub>1</sub> = V<sub>e</sub>/R<sub>1</sub> = I<sub>F</sub> · I<sub>L</sub> = |V<sub>S</sub>|/R<sub>L</sub> · I<sub>O</sub> = I<sub>F</sub> + I<sub>L</sub></td><td>I<sub>O</sub> não pode passar de 25 mA no 741.</td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="card">
+    <h2>Calculadoras rápidas</h2>
+    <div class="mini" id="aoCalc">
+      <div class="calc"><h3>Ganho em dB</h3>
+        <label class="field"><span>A<sub>V</sub></span><input type="number" id="cgAv" step="any" value="10"></label>
+        <div class="r" id="cgOut"></div></div>
+      <div class="calc"><h3>Frequência unitária e de corte</h3>
+        <label class="field"><span>Tempo de subida t<sub>r</sub> (µs)</span><input type="number" id="cfTr" step="any" value="0.35"></label>
+        <label class="field"><span>Ganho A<sub>V</sub></span><input type="number" id="cfAv" step="any" value="100"></label>
+        <div class="r" id="cfOut"></div></div>
+      <div class="calc"><h3>Slew rate</h3>
+        <label class="field"><span>SR (V/µs)</span><input type="number" id="csSr" step="any" value="0.5"></label>
+        <label class="field"><span>Tensão de pico (V)</span><input type="number" id="csVp" step="any" value="10"></label>
+        <div class="r" id="csOut"></div></div>
+      <div class="calc"><h3>RRMC (CMRR)</h3>
+        <label class="field"><span>RRMC (dB)</span><input type="number" id="crDb" step="any" value="90"></label>
+        <div class="r" id="crOut"></div></div>
+    </div>
+    <p style="color:var(--muted);font-size:.9rem">f<sub>unit</sub> = 0,35 / t<sub>r</sub> · f<sub>c</sub> = f<sub>unit</sub> / A<sub>V</sub> · f<sub>máx</sub> = SR / (2π·V<sub>P</sub>) · A<sub>d</sub>/A<sub>c</sub> = 10<sup>RRMC/20</sup></p>
+  </div>
+
+  <div class="card">
+    <h2>Reforçador de corrente</h2>
+    <p>Se a carga pedir mais que os 25 mA do AO, a saída é ligada à base de um transistor e a carga vai no emissor. O AO passa a fornecer só a corrente de base, e a corrente da carga é cerca de β vezes maior. Um transistor NPN sozinho conduz só o semiciclo positivo, e o par complementar (push-pull classe B) conduz os dois.</p>
+    <p>Exemplo do material: ganho 10, V<sub>e</sub> = 1 V e carga de 50 Ω daria 221 mA direto no AO, o que o destruiria.</p>
+  </div>
+  <p><a class="btn primary" href="#lista" style="display:inline-block;text-decoration:none">Questões 8 e 9 da Lista N2</a></p>
+</section>
+
+<!-- ============ EXERCÍCIOS ============ -->
+<section class="view" data-view="exercicios" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Praticar</p>
+    <h1>Exercícios</h1>
+    <p class="lede">Questões numéricas com números sorteados e questões de conceito. Use a dica, tente de novo e só então abra a resolução. Aceita vírgula ou ponto.</p>
+  </header>
+  <div class="card">
+    <div class="chips" id="exTabs" role="group" aria-label="Filtrar por tópico"></div>
+    <div class="exsum" style="margin-top:14px">
+      <div id="exSum" aria-live="polite"></div>
+      <div class="dbar" style="margin:0">
+        <button class="btn primary" type="button" id="exSim">Simulado</button>
+        <button class="btn" type="button" id="exShuffle">Novas variantes</button>
+        <button class="btn ghost" type="button" id="exReset">Zerar progresso</button>
+      </div>
+    </div>
+  </div>
+  <div id="exBanner"></div>
+  <div class="list" id="exList"></div>
+</section>
+
+<!-- ============ CARTÕES ============ -->
+<section class="view" data-view="cartoes" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Revisão</p>
+    <h1>Cartões</h1>
+    <p class="lede">Leia a pergunta, tente responder de cabeça e vire o cartão. Marque o que você sabe e revise o resto. Atalhos: espaço vira, setas navegam.</p>
+  </header>
+  <div class="chips" id="cdTabs" role="group" aria-label="Filtro dos cartões"></div>
+  <div class="deck">
+    <button class="fc" id="cdCard" type="button" aria-label="Cartão. Pressione para virar">
+      <div class="in">
+        <div class="face front"><span class="tag" id="cdTagF"></span><div class="q" id="cdQ"></div></div>
+        <div class="face back"><span class="tag" id="cdTagB"></span><div class="a" id="cdA"></div></div>
+      </div>
+    </button>
+    <div class="dbar">
+      <button class="btn" type="button" id="cdPrev">← Anterior</button>
+      <button class="btn" type="button" id="cdNext">Próximo →</button>
+      <span class="mono" id="cdPos" style="color:var(--muted)"></span>
+    </div>
+    <div class="dbar">
+      <button class="btn primary" type="button" id="cdKnow">Sei</button>
+      <button class="btn" type="button" id="cdReview">Revisar depois</button>
+      <button class="btn ghost" type="button" id="cdShuf">Embaralhar</button>
+      <span id="cdState" class="badge b-no" hidden></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FÓRMULAS ============ -->
+<section class="view" data-view="formulas" hidden>
+  <header class="page-head">
+    <p class="eyebrow">Consulta rápida</p>
+    <h1>Fórmulas e pegadinhas</h1>
+    <p class="lede">Tudo que você precisa na ponta da língua. Use sempre o VBE do enunciado: 0,7 V na Lista N2 e 0,6 V nas contas do quadro.</p>
+  </header>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>Assunto</th><th>Fórmula</th></tr></thead>
+      <tbody>
+        <tr><td><b>TBJ</b> correntes</td><td class="m">I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub></td></tr>
+        <tr><td><b>TBJ</b> tensões</td><td class="m">V<sub>CE</sub> = V<sub>CB</sub> + V<sub>BE</sub> · V<sub>BE</sub> ≈ 0,6 V</td></tr>
+        <tr><td><b>TBJ</b> α</td><td class="m">α = I<sub>C</sub>/I<sub>E</sub> = β/(β+1)</td></tr>
+        <tr><td><b>TBJ</b> β</td><td class="m">β = I<sub>C</sub>/I<sub>B</sub> = α/(1−α)</td></tr>
+        <tr><td><b>TBJ</b> potência</td><td class="m">P<sub>D</sub> = I<sub>C</sub> · V<sub>CE</sub></td></tr>
+        <tr><td><b>Base constante</b></td><td class="m">V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub> · R<sub>B</sub> = V<sub>RB</sub>/I<sub>B</sub> · V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub> · R<sub>C</sub> = V<sub>RC</sub>/I<sub>C</sub></td></tr>
+        <tr><td><b>Emissor constante</b></td><td class="m">R<sub>E</sub> = 0,1V<sub>CC</sub>/I<sub>E</sub> · R<sub>B</sub> = (0,9V<sub>CC</sub> − V<sub>BE</sub>)/I<sub>B</sub> · R<sub>C</sub> = (0,9V<sub>CC</sub> − V<sub>CE</sub>)/I<sub>C</sub></td></tr>
+        <tr><td><b>Divisor de tensão</b></td><td class="m">I<sub>B2</sub> = 10·I<sub>B</sub> · V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub> · R<sub>B2</sub> = V<sub>B</sub>/I<sub>B2</sub> · R<sub>B1</sub> = (V<sub>CC</sub> − V<sub>B</sub>)/(I<sub>B2</sub> + I<sub>B</sub>)</td></tr>
+        <tr><td><b>Chave</b></td><td class="m">I<sub>C(sat)</sub> ≈ V<sub>CC</sub>/R<sub>C</sub> · V<sub>CE(corte)</sub> ≈ V<sub>CC</sub> · I<sub>B</sub> = I<sub>C</sub>/10 · R<sub>B</sub> = (V<sub>CC</sub> − V<sub>BE</sub>)/I<sub>B</sub></td></tr>
+        <tr><td><b>JFET</b> corrente</td><td class="m">I<sub>D</sub> = I<sub>DSS</sub>(1 − V<sub>GS</sub>/V<sub>P</sub>)²</td></tr>
+        <tr><td><b>JFET</b> pinçamento</td><td class="m">V<sub>DS(P)</sub> = |V<sub>P</sub>| − |V<sub>GS</sub>|</td></tr>
+        <tr><td><b>JFET</b> autopolarização</td><td class="m">R<sub>S</sub> = V<sub>P</sub>/I<sub>DSS</sub> · V<sub>RS</sub> = I<sub>D</sub>R<sub>S</sub> · R<sub>D</sub> = (V<sub>CC</sub> − V<sub>DS</sub> − V<sub>RS</sub>)/I<sub>D</sub></td></tr>
+        <tr><td><b>MOSFET</b> saturação</td><td class="m">I<sub>D</sub> = (k<sub>n</sub>/2)(v<sub>GS</sub> − V<sub>T</sub>)² · v<sub>DS</sub> ≥ v<sub>GS</sub> − V<sub>T</sub></td></tr>
+        <tr><td><b>MOSFET</b> triodo</td><td class="m">I<sub>D</sub> = k<sub>n</sub>[(v<sub>GS</sub> − V<sub>T</sub>)v<sub>DS</sub> − v<sub>DS</sub>²/2] · v<sub>DS</sub> &lt; v<sub>GS</sub> − V<sub>T</sub></td></tr>
+        <tr><td><b>MOSFET</b> circuito</td><td class="m">V<sub>DS</sub> = V<sub>DD</sub> − I<sub>D</sub>·R<sub>D</sub></td></tr>
+        <tr><td><b>Amp-Op</b> inversor</td><td class="m">A<sub>V</sub> = −R<sub>F</sub>/R<sub>1</sub></td></tr>
+        <tr><td><b>Amp-Op</b> não inversor</td><td class="m">A<sub>V</sub> = 1 + R<sub>F</sub>/R<sub>1</sub></td></tr>
+        <tr><td><b>Amp-Op</b> somador</td><td class="m">V<sub>S</sub> = −R<sub>F</sub>(V<sub>1</sub>/R<sub>1</sub> + V<sub>2</sub>/R<sub>2</sub> + V<sub>3</sub>/R<sub>3</sub>)</td></tr>
+        <tr><td><b>Amp-Op</b> subtrator</td><td class="m">V<sub>S</sub> = (R<sub>F</sub>/R<sub>1</sub>)(V<sub>2</sub> − V<sub>1</sub>)</td></tr>
+        <tr><td><b>Amp-Op</b> ganho em dB</td><td class="m">A<sub>V(dB)</sub> = 20·log|A<sub>V</sub>|</td></tr>
+        <tr><td><b>Amp-Op</b> correntes</td><td class="m">I<sub>F</sub> = V<sub>e</sub>/R<sub>1</sub> · I<sub>L</sub> = V<sub>S</sub>/R<sub>L</sub> · I<sub>O</sub> = I<sub>F</sub> + I<sub>L</sub></td></tr>
+        <tr><td><b>Amp-Op</b> freqüência</td><td class="m">f<sub>unit</sub> = 0,35/t<sub>r</sub> · f<sub>c</sub> = f<sub>unit</sub>/A<sub>V</sub> · SR = 2π·f·V<sub>P</sub></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Pegadinhas</h2>
+    <ul class="tight">
+      <li><b>“Saturação” tem dois sentidos.</b> No TBJ, saturação é chave fechada (VCE ≈ 0, duas junções diretas). No JFET e no MOSFET, saturação é a região de corrente constante, usada para amplificar. No MOSFET, o que lembra chave fechada é o triodo.</li>
+      <li><b>Corte.</b> No TBJ, VBE abaixo de cerca de 0,6 V. No MOSFET, vGS abaixo de VT.</li>
+      <li><b>Efeito transistor</b> é BE direta com BC reversa. Direta-direta é saturação, reversa-reversa é corte.</li>
+      <li><b>α é menor que 1 e β é bem maior que 1.</b> Mesmo assim, IE = IC + IB.</li>
+      <li><b>Circuito 2 do slide inverte a lógica:</b> corte acende o LED, saturação apaga.</li>
+      <li><b>Controle:</b> TBJ por corrente (IB). FET e MOSFET por tensão (VGS), com corrente de porta quase nula.</li>
+      <li><b>MOSFET:</b> compare vDS com vGS − VT e sempre verifique a região depois de calcular.</li>
+      <li><b>Valores comerciais:</b> o professor arredonda RB e RC. 1140 Ω vira 1k2.</li>
+      <li><b>Inversor x não inversor:</b> o inversor tem ganho negativo e o não inversor é sempre 1 + RF/R1. Na prova, olhe onde o sinal entra.</li>
+      <li><b>Corrente do AO:</b> IO = IF + IL, e não passa de 25 mA no 741. Com saturação os cálculos lineares não valem.</li>
+      <li><b>Divisor:</b> IB2 = 10·IB. Se a questão não der VBE nem β (Q6 e Q7), o gabarito usa 0,6 V e β = 100.</li>
+    </ul>
+  </div>
+  <div class="note n-amber"><p><b>O item 12 não foi passado</b> (amplificadores com MOSFET). Se cair na N2, o material precisará vir do livro-texto ou do professor.</p></div>
+</section>
+
+</main>
+</div>
+<script>
+(function(){
+'use strict';
+/* ---------- utilidades ---------- */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const store={
+  get(k,d){try{const v=localStorage.getItem('bn2.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('bn2.'+k,JSON.stringify(v))}catch(e){}}
+};
+const fmt=(v,d=2)=>{if(!isFinite(v))return '—';if(Math.abs(v)<1e-12)v=0;let s=(+v).toFixed(d);if(s.indexOf('.')>-1)s=s.replace(/0+$/,'').replace(/\.$/,'');return s.replace('.',',')};
+const fR=r=>r>=1e6?fmt(r/1e6,2)+' MΩ':r>=1e3?fmt(r/1e3,2)+' kΩ':fmt(r,1)+' Ω';
+const fI=a=>a>=1?fmt(a,2)+' A':a>=1e-3?fmt(a*1e3,2)+' mA':fmt(a*1e6,1)+' µA';
+const fP=w=>w>=1?fmt(w,2)+' W':fmt(w*1e3,1)+' mW';
+const fV=v=>fmt(v,2)+' V';
+const rpick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const E12=[1,1.2,1.5,1.8,2.2,2.7,3.3,3.9,4.7,5.6,6.8,8.2];
+const nearE12=r=>{const d=Math.pow(10,Math.floor(Math.log10(r)));let best=r,bd=Infinity;E12.concat([10]).forEach(m=>{const c=m*d;if(Math.abs(c-r)<bd){bd=Math.abs(c-r);best=c}});return Math.round(best)};
+const nice=(max,n)=>{const raw=max/n,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;return (m<=1?1:m<=2?2:m<=5?5:10)*p};
+const ticks=(min,max,n)=>{const s=nice(max-min,n),a=[];for(let v=Math.ceil(min/s-1e-9)*s;v<=max+1e-9;v+=s)a.push(+v.toFixed(10));return a};
+const path=(pts,X,Y)=>pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('');
+const sample=(f,a,b,n)=>{const o=[];for(let i=0;i<=n;i++){const x=a+(b-a)*i/n;o.push([x,f(x)])}return o};
+
+function axes(o){
+  const w=o.w||520,h=o.h||320,l=52,r=16,t=12,b=42,x0=o.xmin||0,y0=o.ymin||0;
+  const X=v=>l+(v-x0)/(o.xmax-x0)*(w-l-r), Y=v=>h-b-(v-y0)/(o.ymax-y0)*(h-t-b);
+  let s='';
+  ticks(x0,o.xmax,6).forEach(v=>{s+=`<line class="gl" x1="${X(v)}" x2="${X(v)}" y1="${t}" y2="${h-b}"/><text class="tk" x="${X(v)}" y="${h-b+15}" text-anchor="middle">${fmt(v,2)}</text>`});
+  ticks(y0,o.ymax,5).forEach(v=>{s+=`<line class="gl" x1="${l}" x2="${w-r}" y1="${Y(v)}" y2="${Y(v)}"/><text class="tk" x="${l-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v,2)}</text>`});
+  s+=`<line class="ax" x1="${l}" x2="${w-r}" y1="${h-b}" y2="${h-b}"/><line class="ax" x1="${l}" x2="${l}" y1="${t}" y2="${h-b}"/>`;
+  s+=`<text class="al" x="${(l+w-r)/2}" y="${h-6}" text-anchor="middle">${o.xl}</text><text class="al" transform="translate(13 ${(t+h-b)/2}) rotate(-90)" text-anchor="middle">${o.yl}</text>`;
+  const clip=`<defs><clipPath id="${o.id}"><rect x="${l}" y="${t}" width="${w-l-r}" height="${h-t-b}"/></clipPath></defs>`;
+  return {X,Y,wrap:(inner,outer)=>`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${o.label}">${clip}${s}<g clip-path="url(#${o.id})">${inner}</g>${outer||''}</svg>`};
+}
+const badge=(el,reg)=>{
+  const map={corte:'b-corte',ativa:'b-ativa','saturação':'b-sat','ôhmica':'b-ativa',triodo:'b-ativa'};
+  el.className='badge '+(map[reg]||'b-corte');el.textContent=reg;
+};
+
+/* ---------- tema ---------- */
+function applyTheme(t){
+  const r=document.documentElement;
+  if(t==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);
+  $$('[data-theme-set]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.themeSet===t)));
+  store.set('theme',t);
+}
+applyTheme(store.get('theme','auto'));
+$$('[data-theme-set]').forEach(b=>b.addEventListener('click',()=>applyTheme(b.dataset.themeSet)));
+
+/* ---------- sliders com valor ao lado ---------- */
+$$('input[type=range]').forEach(i=>{
+  const b=i.closest('.field').querySelector('span b');
+  const u=()=>{b.textContent=fmt(+i.value,+(i.dataset.d||0))+(i.dataset.u?' '+i.dataset.u:'')};
+  i.addEventListener('input',u);i._u=u;u();
+});
+
+/* ======================================================================
+   TBJ: explorador de regiões
+   ====================================================================== */
+const REG={
+  corte:{t:'Região de corte',bc:0,be:0,fl:0,d:'As duas junções estão reversas. Não há corrente de base e o coletor não conduz.',
+    l:['V<sub>BE</sub> abaixo de cerca de 0,6 V','I<sub>B</sub> = 0 e I<sub>C</sub> ≈ 0','V<sub>CE</sub> ≈ V<sub>CC</sub>','Uso: chave aberta']},
+  ativa:{t:'Região ativa',bc:0,be:1,fl:1,d:'A junção base-emissor conduz e a base-coletor está reversa. A corrente de coletor acompanha a de base.',
+    l:['I<sub>C</sub> = β · I<sub>B</sub>','V<sub>CE</sub> = V<sub>CC</sub> − I<sub>C</sub>·R<sub>C</sub>','Uso: amplificação']},
+  sat:{t:'Região de saturação',bc:1,be:1,fl:2,d:'As duas junções conduzem. A corrente de coletor chegou ao máximo que o circuito permite, e mais I<sub>B</sub> não adianta.',
+    l:['I<sub>C(sat)</sub> ≈ V<sub>CC</sub>/R<sub>C</sub>','V<sub>CE</sub> ≈ 0','I<sub>B</sub> ≥ I<sub>C</sub>/β (forte: I<sub>C</sub>/10)','Uso: chave fechada']}
+};
+function setReg(k){
+  const r=REG[k];
+  $$('#regTabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.reg===k)));
+  $('#regTitle').textContent=r.t;$('#regDesc').innerHTML=r.d;
+  $('#regList').innerHTML=r.l.map(x=>`<li>${x}</li>`).join('');
+  $('#jbcR').setAttribute('fill',r.bc?'#0C6648':'#C42E27');
+  $('#jbeR').setAttribute('fill',r.be?'#0C6648':'#C42E27');
+  $('#jbcT').textContent='BC '+(r.bc?'dir.':'rev.');
+  $('#jbeT').textContent='BE '+(r.be?'dir.':'rev.');
+  const fl=$('#regFlow'),ib=$('#regIb');
+  fl.setAttribute('stroke-width',[3,4,9][r.fl]);fl.setAttribute('opacity',[.25,1,1][r.fl]);fl.setAttribute('stroke-dasharray',r.fl===0?'6 6':'none');
+  ib.setAttribute('stroke-width',[3,2.5,5][r.fl]);ib.setAttribute('opacity',[0,1,1][r.fl]);
+  $('#regFlowT').textContent=r.fl===0?'sem corrente de coletor':'elétrons do emissor ao coletor';
+}
+$('#regTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-reg]');if(b)setReg(b.dataset.reg)});
+
+/* α e β */
+function simAB(){
+  const B=+$('#abBeta').value,Ib=$('#abIb').value/1e6,Ic=B*Ib,Ie=Ic+Ib;
+  $('#abIc').textContent=fI(Ic);$('#abIe').textContent=fI(Ie);$('#abAl').textContent=fmt(Ic/Ie,3);
+}
+$('#simAB').addEventListener('input',simAB);
+
+/* Reta de carga */
+function simB(){
+  const Vcc=+$('#sbVcc').value,Rc=+$('#sbRc').value,Ib=$('#sbIb').value/1000,B=+$('#sbBeta').value;
+  const Ics=Vcc/Rc,IbS=Ics/B;
+  let reg,Ic,Vce;
+  if(Ib<=1e-5){reg='corte';Ic=0;Vce=Vcc}
+  else if(Ib>=IbS){reg='saturação';Ic=Ics;Vce=0}
+  else{reg='ativa';Ic=B*Ib;Vce=Vcc-Ic*Rc}
+  const ymax=Ics*1000*1.25;
+  const A=axes({id:'cB',xmax:Vcc,ymax,xl:'VCE (V)',yl:'IC (mA)',label:'Curvas de saída e reta de carga do TBJ'});
+  let g='',lab='';
+  [.25,.5,.75,1,1.2].forEach(k=>{
+    const ib=IbS*k,ic=B*ib*1000;
+    g+=`<path class="crv" d="${path(sample(v=>ic*(1-Math.exp(-v/0.35)),0,Vcc,70),A.X,A.Y)}"/>`;
+    lab+=`<text class="tk" x="${A.X(Vcc)-3}" y="${A.Y(ic)-4}" text-anchor="end">${fI(ib)}</text>`;
+  });
+  if(Ib>1e-5){const ic=B*Ib*1000;g+=`<path class="cur" d="${path(sample(v=>ic*(1-Math.exp(-v/0.35)),0,Vcc,70),A.X,A.Y)}"/>`}
+  g+=`<line class="ldl" x1="${A.X(0)}" y1="${A.Y(Ics*1000)}" x2="${A.X(Vcc)}" y2="${A.Y(0)}"/>`;
+  lab+=`<circle class="qpt" cx="${A.X(Vce)}" cy="${A.Y(Ic*1000)}" r="7"/><text class="st" x="${A.X(Vce)+(Vce>Vcc*.8?-12:12)}" y="${A.Y(Ic*1000)-10}" text-anchor="${Vce>Vcc*.8?'end':'start'}">Q</text>`;
+  $('#sbPlot').innerHTML=A.wrap(g,lab);
+  badge($('#sbReg'),reg);
+  $('#sbIc').textContent=fI(Ic);$('#sbVce').textContent=fV(Vce);$('#sbVrc').textContent=fV(Ic*Rc);
+  $('#sbPd').textContent=fP(Ic*Vce);$('#sbIbs').textContent=fI(IbS);
+  $('#sbMsg').innerHTML={
+    'corte':'I<sub>B</sub> = 0: a junção base-emissor não conduz. É a chave aberta, e V<sub>CE</sub> = V<sub>CC</sub>.',
+    'ativa':`Região ativa: I<sub>C</sub> = β·I<sub>B</sub> = ${fI(Ic)}. O que sobra para o transistor é V<sub>CE</sub> = V<sub>CC</sub> − I<sub>C</sub>·R<sub>C</sub> = ${fV(Vce)}. Falta ${fI(IbS-Ib)} de I<sub>B</sub> para saturar.`,
+    'saturação':`I<sub>B</sub> passou do mínimo (${fI(IbS)}). A corrente fica limitada pelo circuito, I<sub>C(sat)</sub> = V<sub>CC</sub>/R<sub>C</sub> = ${fI(Ics)}, e V<sub>CE</sub> ≈ 0: chave fechada.`
+  }[reg];
+}
+$('#simB').addEventListener('input',simB);
+
+/* ======================================================================
+   Polarização
+   ====================================================================== */
+const POLEX={
+  1:{m:'base',Vcc:20,Ic:300,Vce:8,Ib:3},
+  2:{m:'base',Vcc:15,Ic:100,Vce:7.5,Ib:1},
+  3:{m:'base',Vcc:15,Ic:150,Vce:9,Ib:3},
+  4:{m:'emissor',Vcc:12,Ic:2,Vce:6,B:110}
+};
+function simPol(){
+  const mode=$('#polMode').value;
+  $$('.only-base').forEach(e=>e.hidden=mode!=='base');$$('.only-em').forEach(e=>e.hidden=mode!=='emissor');
+  $('#gRE').hidden=mode!=='emissor';$('#gNoRE').hidden=mode==='emissor';$('#cRE').hidden=mode!=='emissor';
+  const Vcc=+$('#plVcc').value,Ic=+$('#plIc').value/1000,Vce=+$('#plVce').value,Ib0=+$('#plIb').value/1000,B=+$('#plBeta').value,Vbe=0.6;
+  const out=$('#plSteps');
+  const reset=m=>{out.innerHTML=`<li class="r">${m}</li>`;
+    $('#cVCC').textContent='VCC';['RB','RC','RE','IB','IC','VCE'].forEach(k=>$('#c'+k).textContent=k)};
+  if(!(Vcc>0&&Ic>0&&Vce>0))return reset('Preencha V<sub>CC</sub>, I<sub>C</sub> e V<sub>CE</sub> com valores positivos.');
+  let s='';
+  if(mode==='base'){
+    if(!(Ib0>0))return reset('Preencha I<sub>B</sub> com um valor positivo.');
+    if(Vce>=Vcc)return reset('V<sub>CE</sub> precisa ser menor que V<sub>CC</sub>.');
+    const VRB=Vcc-Vbe,RB=VRB/Ib0,VRC=Vcc-Vce,RC=VRC/Ic;
+    s+=`<li>V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub> = ${fmt(Vcc)} − 0,6 = <span class="r">${fV(VRB)}</span></li>`;
+    s+=`<li>R<sub>B</sub> = V<sub>RB</sub> / I<sub>B</sub> = ${fmt(VRB)} / ${fmt(Ib0,4)} = <span class="r">${fR(RB)}</span></li>`;
+    s+=`<li>V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub> = ${fmt(Vcc)} − ${fmt(Vce)} = <span class="r">${fV(VRC)}</span></li>`;
+    s+=`<li>R<sub>C</sub> = V<sub>RC</sub> / I<sub>C</sub> = ${fmt(VRC)} / ${fmt(Ic,4)} = <span class="r">${fR(RC)}</span></li>`;
+    s+=`<li>Conferência: β = I<sub>C</sub>/I<sub>B</sub> = ${fmt(Ic/Ib0,1)}</li>`;
+    $('#cRB').textContent=fR(RB);$('#cRC').textContent=fR(RC);$('#cIB').textContent=fI(Ib0);$('#cIC').textContent=fI(Ic);
+  }else{
+    if(!(B>0))return reset('Preencha β com um valor positivo.');
+    if(Vce>=0.9*Vcc)return reset('V<sub>CE</sub> precisa ser menor que 0,9·V<sub>CC</sub>.');
+    const VRE=0.1*Vcc,RE=VRE/Ic,VRC=0.9*Vcc-Vce,RC=VRC/Ic,Ib=Ic/B,VRB=0.9*Vcc-Vbe,RB=VRB/Ib;
+    if(VRB<=0)return reset('V<sub>CC</sub> muito baixo para esta regra.');
+    s+=`<li>V<sub>RE</sub> = 0,1·V<sub>CC</sub> = <span class="r">${fV(VRE)}</span> e R<sub>E</sub> = V<sub>RE</sub> / I<sub>E</sub> = ${fmt(VRE)} / ${fmt(Ic,4)} = <span class="r">${fR(RE)}</span> (I<sub>E</sub> ≈ I<sub>C</sub>)</li>`;
+    s+=`<li>V<sub>RC</sub> = 0,9·V<sub>CC</sub> − V<sub>CE</sub> = ${fmt(0.9*Vcc,2)} − ${fmt(Vce)} = ${fV(VRC)}, então R<sub>C</sub> = ${fmt(VRC)} / ${fmt(Ic,4)} = <span class="r">${fR(RC)}</span></li>`;
+    s+=`<li>I<sub>B</sub> = I<sub>C</sub> / β = ${fmt(Ic*1000,3)} mA / ${fmt(B)} = <span class="r">${fI(Ib)}</span></li>`;
+    s+=`<li>V<sub>RB</sub> = 0,9·V<sub>CC</sub> − V<sub>BE</sub> = ${fmt(0.9*Vcc,2)} − 0,6 = ${fV(VRB)}, então R<sub>B</sub> = ${fmt(VRB)} / ${fmt(Ib,6)} = <span class="r">${fR(RB)}</span></li>`;
+    $('#cRB').textContent=fR(RB);$('#cRC').textContent=fR(RC);$('#cRE').textContent=fR(RE);$('#cIB').textContent=fI(Ib);$('#cIC').textContent=fI(Ic);
+  }
+  $('#cVCC').textContent=`VCC = ${fmt(Vcc)} V`;$('#cVCE').textContent=`VCE = ${fmt(Vce)} V`;
+  out.innerHTML=s;
+}
+$('#simPol').addEventListener('input',simPol);$('#simPol').addEventListener('change',simPol);
+$('#plEx').addEventListener('click',e=>{
+  const b=e.target.closest('[data-ex]');if(!b)return;const x=POLEX[b.dataset.ex];
+  $('#polMode').value=x.m;$('#plVcc').value=x.Vcc;$('#plIc').value=x.Ic;$('#plVce').value=x.Vce;
+  if(x.m==='base')$('#plIb').value=x.Ib;else $('#plBeta').value=x.B;
+  simPol();
+});
+
+/* ======================================================================
+   Chave
+   ====================================================================== */
+function lamp(){
+  const Vcc=+$('#swVcc').value,Ic=+$('#swIc').value/1000,B=+$('#swBeta').value,Rb=+$('#swRbUse').value;
+  const on=$('#lpBtn').getAttribute('aria-pressed')==='true';
+  if(!(Vcc>0&&Ic>0&&B>0))return;
+  let Ib=0,I=0,Vce=Vcc,reg='corte',br=0;
+  if(on&&Rb>0){Ib=(Vcc-0.6)/Rb;if(B*Ib>=Ic){reg='saturação';I=Ic;Vce=0;br=1}else{reg='ativa';I=B*Ib;Vce=Vcc-I*(Vcc/Ic);br=I/Ic}}
+  $('#lpSw').setAttribute('y2',on?148:132);
+  $('#lpLamp').setAttribute('opacity',br);$('#lpGlow').setAttribute('opacity',br*.5);
+  $('#lpIb').textContent=fI(Ib);$('#lpIc').textContent=fI(I);$('#lpVc').textContent=fV(Vce);
+  $('#lpVceT').textContent='VCE = '+fmt(Vce,1)+' V';
+  badge($('#lpReg'),reg);
+  $('#lpBtn').textContent=on?'Soltar a chave':'Pressionar a chave';
+  $('#lpMsg').innerHTML=!on?'Chave solta: I<sub>B</sub> = 0, o transistor está em corte e V<sub>CE</sub> = V<sub>CC</sub>. A lâmpada fica apagada.'
+    :reg==='saturação'?'Saturação: o transistor é uma chave fechada, V<sub>CE</sub> ≈ 0 e a lâmpada recebe V<sub>CC</sub> inteira.'
+    :'I<sub>B</sub> insuficiente: β·I<sub>B</sub> fica abaixo de I<sub>C</sub> e o transistor não satura. A lâmpada fica fraca. Diminua R<sub>B</sub>.';
+}
+function simSw(auto){
+  const Vcc=+$('#swVcc').value,Ic=+$('#swIc').value/1000,B=+$('#swBeta').value,out=$('#swSteps');
+  if(!(Vcc>0.6&&Ic>0&&B>0)){out.innerHTML='<li class="r">Preencha V<sub>CC</sub> (acima de 0,6 V), I<sub>C</sub> e β com valores positivos.</li>';return}
+  const Ib=Ic/10,Rb=(Vcc-0.6)/Ib,RbMax=(Vcc-0.6)/(Ic/B),Rc=Vcc/Ic,E=nearE12(Rb);
+  out.innerHTML=
+   `<li>Saturação forte: I<sub>B</sub> = I<sub>C</sub> / 10 = ${fI(Ic)} / 10 = <span class="r">${fI(Ib)}</span></li>`+
+   `<li>V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub> = ${fmt(Vcc)} − 0,6 = ${fV(Vcc-0.6)}</li>`+
+   `<li>R<sub>B</sub> = V<sub>RB</sub> / I<sub>B</sub> = <span class="r">${fR(Rb)}</span>. Valor comercial mais próximo (E12): <span class="r">${fR(E)}</span></li>`+
+   `<li>Carga: R<sub>C</sub> = V<sub>CC</sub> / I<sub>C</sub> = <span class="r">${fR(Rc)}</span> (V<sub>CE</sub> = 0 na saturação)</li>`+
+   `<li>Limite: acima de ${fR(RbMax)} o transistor deixa de saturar (I<sub>B</sub> = I<sub>C</sub>/β).</li>`;
+  if(auto)$('#swRbUse').value=E;
+  lamp();
+}
+$('#simSw').addEventListener('input',e=>{if(e.target.id==='swRbUse')lamp();else simSw(true)});
+$('#lpBtn').addEventListener('click',()=>{const b=$('#lpBtn');b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));lamp()});
+
+function mountFlow(id,def){
+  const el=$('#'+id);
+  el.innerHTML=`<h3>${def.title}</h3><div class="seg" role="group" aria-label="${def.title}">${def.t.map((l,i)=>`<button type="button" data-s="${i}" aria-pressed="${i===0}">${l}</button>`).join('')}</div><div class="flow"></div><p class="fm" style="margin:10px 0 0;color:var(--muted);font-size:.92rem"></p>`;
+  const set=i=>{
+    $$('.seg button',el).forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.s===i)));
+    $('.flow',el).innerHTML=def.n.map((n,k)=>{const s=def.s[i][k];return `<div class="node${s[0]?' on':''}"><div class="nn">${n}</div><div class="nt">${s[1]}</div></div>`}).join('');
+    $('.fm',el).innerHTML=def.m[i];
+  };
+  el.addEventListener('click',e=>{const b=e.target.closest('button[data-s]');if(b)set(+b.dataset.s)});
+  set(0);
+}
+mountFlow('flowRele',{title:'Relé acionado por chave',t:['Chave solta','Chave pressionada'],n:['Chave','Base','Transistor','Relé','Lâmpada 220 V'],
+  s:[[[0,'solta'],[0,'I<sub>B</sub> = 0'],[0,'corte'],[0,'contato em NF'],[0,'apagada']],[[1,'pressionada'],[1,'I<sub>B</sub> ≈ I<sub>C</sub>/10'],[1,'saturação'],[1,'contato em NA'],[1,'acesa']]],
+  m:['Sem corrente de base, a bobina não energiza e o contato fica em NF.','A base recebe corrente, o transistor satura, a bobina energiza e o contato passa de NF para NA.']});
+mountFlow('flowReed',{title:'Alarme com reed switch',t:['Porta fechada','Porta aberta'],n:['Ímã','Reed switch','Base','Transistor','Relé','Sirene'],
+  s:[[[0,'perto do sensor'],[0,'contato aberto'],[0,'I<sub>B</sub> = 0'],[0,'corte'],[0,'desligado'],[0,'silenciosa']],[[1,'longe do sensor'],[1,'contato fecha'],[1,'I<sub>B</sub> flui'],[1,'saturação'],[1,'aciona'],[1,'toca']]],
+  m:['Com a porta fechada o ímã mantém o sensor aberto e nada acontece.','Ao abrir a porta o ímã se afasta, o sensor fecha o circuito, o transistor satura e a sirene toca.']});
+mountFlow('flowLdr',{title:'Sensor de luz com LDR',t:['Com luz','Sem luz'],n:['Luz','LDR','Corrente','Transistor','Relé'],
+  s:[[[0,'com luz'],[0,'resistência baixa'],[0,'desvia ao terra, I<sub>B</sub> ≈ 0'],[0,'corte'],[0,'desligado']],[[1,'escuro'],[1,'resistência alta'],[1,'segue para a base'],[1,'saturação'],[1,'liga']]],
+  m:['Com luz, a resistência do LDR é baixa e ele drena a corrente para o terra, então o transistor fica em corte.','No escuro, a resistência do LDR é alta e a corrente segue para a base: é o princípio de uma lâmpada que acende ao escurecer. O potenciômetro de 1 MΩ do circuito ajusta a sensibilidade.']});
+
+/* ======================================================================
+   JFET
+   ====================================================================== */
+function jfetXs(g,vr,reg){
+  const H=45,ds=H*Math.min(1,g),dd=H*Math.min(1,g+vr);
+  const top=`40,60 360,60 360,${60+dd} 40,${60+ds}`,bot=`40,150 360,150 360,${150-dd} 40,${150-ds}`;
+  return `<svg viewBox="0 0 400 210" role="img" aria-label="Corte do JFET mostrando a região de depleção">
+    <rect x="40" y="60" width="320" height="90" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/>
+    <polygon points="${top}" fill="var(--red)" opacity=".38"/><polygon points="${bot}" fill="var(--red)" opacity=".38"/>
+    <rect class="blk" x="90" y="14" width="220" height="46"/><rect class="blk" x="90" y="150" width="220" height="46"/>
+    <text class="st" x="200" y="42" text-anchor="middle">G · porta (junção PN reversa)</text>
+    <text class="st" x="200" y="178" text-anchor="middle">G</text>
+    <path class="wire" d="M8 105H40M360 105H392"/>
+    <text class="st" x="24" y="96" text-anchor="middle">S</text><text class="st" x="376" y="96" text-anchor="middle">D</text>
+    <text class="lbl" x="200" y="110" text-anchor="middle">${g>=1?'canal fechado':reg==='saturação'?'canal pinçado no dreno':'canal'}</text>
+    <text class="tk" x="200" y="128" text-anchor="middle" style="fill:var(--red)">depleção em vermelho</text>
+  </svg>`;
+}
+function simJ(){
+  const Idss=+$('#sjIdss').value,Vp=+$('#sjVp').value,gs=$('#sjVgs'),ds=$('#sjVds');
+  const xmax=Math.max(8,Math.ceil(Vp*2));
+  gs.max=Vp;if(+gs.value>Vp)gs.value=Vp;ds.max=xmax;if(+ds.value>xmax)ds.value=xmax;
+  gs._u();ds._u();$('#sjVp')._u();
+  const Vg=+gs.value,Vd=+ds.value,g=Vg/Vp,idSat=Idss*(1-g)*(1-g),vdsP=Vp-Vg;
+  let reg,Id;
+  if(g>=1){reg='corte';Id=0}
+  else if(Vd>=vdsP){reg='saturação';Id=idSat}
+  else{reg='ôhmica';const u=Vd/Vp;Id=Idss*(2*(1-g)*u-u*u)}
+  $('#sjXs').innerHTML=jfetXs(g,Vd/Vp,reg);
+  badge($('#sjReg'),reg);$('#sjId').textContent=fmt(Id,2)+' mA';$('#sjVdsp').textContent=fV(Math.max(vdsP,0));
+  /* saída */
+  const A=axes({id:'cJ1',xmax,ymax:Idss*1.12,xl:'VDS (V)',yl:'ID (mA)',label:'Curvas de dreno do JFET'});
+  const curve=gg=>v=>{const e=Vp*(1-gg);return v<e?Idss*(2*(1-gg)*(v/Vp)-Math.pow(v/Vp,2)):Idss*Math.pow(1-gg,2)};
+  let gp='',lb='';
+  [0,.25,.5,.75].forEach(k=>{gp+=`<path class="crv" d="${path(sample(curve(k),0,xmax,100),A.X,A.Y)}"/>`;lb+=`<text class="tk" x="${A.X(xmax)-3}" y="${A.Y(Idss*Math.pow(1-k,2))-4}" text-anchor="end">${fmt(k*Vp,1)} V</text>`});
+  gp+=`<path class="loc" d="${path(sample(v=>Idss*Math.pow(v/Vp,2),0,Vp,40),A.X,A.Y)}"/>`;
+  gp+=`<path class="cur" d="${path(sample(curve(Math.min(g,.999)),0,xmax,100),A.X,A.Y)}"/>`;
+  lb+=`<circle class="qpt" cx="${A.X(Vd)}" cy="${A.Y(Id)}" r="7"/>`;
+  $('#sjOut').innerHTML=A.wrap(gp,lb);
+  /* transferência */
+  const T=axes({id:'cJ2',xmax:Vp,ymax:Idss*1.12,xl:'|VGS| (V)',yl:'ID (mA)',label:'Curva de transferência do JFET'});
+  const tp=`<path class="crv" style="stroke-width:2.6" d="${path(sample(v=>Idss*Math.pow(1-v/Vp,2),0,Vp,60),T.X,T.Y)}"/>`;
+  $('#sjTr').innerHTML=T.wrap(tp,`<circle class="qpt" cx="${T.X(Vg)}" cy="${T.Y(idSat)}" r="7"/><text class="tk" x="${T.X(0)+6}" y="${T.Y(Idss)-6}">I<tspan dy="3" font-size="9">DSS</tspan></text>`);
+}
+$('#simJ').addEventListener('input',simJ);
+
+const JBEX={1:{Vcc:14,Vds:7.5,Id:4,Vp:8,Idss:6},2:{Vcc:12,Vds:6,Id:2,Vp:8,Idss:6}};
+function simJb(){
+  const Vcc=+$('#jbVcc').value,Vds=+$('#jbVds').value,Id=+$('#jbId').value/1000,Vp=+$('#jbVp').value,Idss=+$('#jbIdss').value/1000,out=$('#jbSteps');
+  if(!(Vcc>0&&Vds>0&&Id>0&&Vp>0&&Idss>0)){out.innerHTML='<li class="r">Preencha todos os campos com valores positivos.</li>';return}
+  const Rs=Vp/Idss,Vrs=Id*Rs,Rd=(Vcc-Vds-Vrs)/Id;
+  let s=`<li>R<sub>S</sub> = V<sub>P</sub> / I<sub>DSS</sub> = ${fmt(Vp)} / ${fmt(Idss,4)} = <span class="r">${fR(Rs)}</span></li>`+
+        `<li>V<sub>RS</sub> = I<sub>D</sub> · R<sub>S</sub> = ${fmt(Id,4)} · ${fmt(Rs,1)} = ${fV(Vrs)}</li>`;
+  if(Rd<=0)s+='<li class="r">V<sub>CC</sub> − V<sub>DS</sub> − V<sub>RS</sub> não é positivo: aumente V<sub>CC</sub> ou reduza V<sub>DS</sub> ou I<sub>D</sub>.</li>';
+  else s+=`<li>R<sub>D</sub> = (V<sub>CC</sub> − V<sub>DS</sub> − V<sub>RS</sub>) / I<sub>D</sub> = (${fmt(Vcc)} − ${fmt(Vds)} − ${fmt(Vrs,2)}) / ${fmt(Id,4)} = <span class="r">${fR(Rd)}</span></li>`;
+  out.innerHTML=s;
+}
+$('#simJb').addEventListener('input',simJb);
+$('#jbEx').addEventListener('click',e=>{const b=e.target.closest('[data-ex]');if(!b)return;const x=JBEX[b.dataset.ex];
+  $('#jbVcc').value=x.Vcc;$('#jbVds').value=x.Vds;$('#jbId').value=x.Id;$('#jbVp').value=x.Vp;$('#jbIdss').value=x.Idss;simJb()});
+
+/* ======================================================================
+   MOSFET
+   ====================================================================== */
+function mosXs(ov,vds){
+  const t=ov>0?Math.min(14,ov/3*14):0,tr=ov>0?t*Math.max(0,1-vds/ov):0;
+  return `<svg viewBox="0 0 400 220" role="img" aria-label="Corte do MOSFET de canal N mostrando o canal">
+    <rect x="20" y="100" width="360" height="100" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.6"/>
+    <text class="tk" x="200" y="186" text-anchor="middle">substrato P (B)</text>
+    <rect x="50" y="100" width="80" height="44" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.6"/><text class="st" x="90" y="128" text-anchor="middle">N+</text>
+    <rect x="270" y="100" width="80" height="44" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.6"/><text class="st" x="310" y="128" text-anchor="middle">N+</text>
+    ${t>0?`<polygon points="130,100 270,100 270,${100+tr} 130,${100+t}" fill="var(--blue)" opacity=".75"/>`:''}
+    <rect x="130" y="93" width="140" height="7" fill="var(--amber-soft)" stroke="var(--amber)"/>
+    <rect class="blk" x="130" y="66" width="140" height="27"/>
+    <text class="tk" x="200" y="84" text-anchor="middle" style="fill:var(--ink)">óxido + porta metálica</text>
+    <path class="wire" d="M90 100V50M310 100V50M200 66V40"/>
+    <text class="st" x="90" y="40" text-anchor="middle">S</text><text class="st" x="310" y="40" text-anchor="middle">D</text><text class="st" x="200" y="32" text-anchor="middle">G</text>
+    <text class="lbl" x="200" y="162" text-anchor="middle">${ov<=0?'sem canal':ov>vds?'canal contínuo':'canal estrangulado no dreno'}</text>
+  </svg>`;
+}
+function simM(){
+  const kn=+$('#smKn').value,VT=+$('#smVt').value,vgs=+$('#smVgs').value,vds=+$('#smVds').value,ov=vgs-VT;
+  let reg,Id;
+  if(ov<=0){reg='corte';Id=0}else if(vds>=ov){reg='saturação';Id=kn/2*ov*ov}else{reg='triodo';Id=kn*(ov*vds-vds*vds/2)}
+  $('#smXs').innerHTML=mosXs(ov,vds);
+  $('#smType').textContent=VT>0?'Enriquecimento':VT<0?'Depleção':'Limite';
+  badge($('#smReg'),reg);$('#smOv').textContent=fV(ov);$('#smId').textContent=fmt(Id,2)+' mA';
+  const A=axes({id:'cM1',xmax:12,ymax:kn/2*16*1.08,xl:'VDS (V)',yl:'ID (mA)',label:'Curvas de dreno do MOSFET'});
+  const curve=o=>v=>v<o?kn*(o*v-v*v/2):kn/2*o*o;
+  let gp='',lb='';
+  [1,2,3,4].forEach(o=>{gp+=`<path class="crv" d="${path(sample(curve(o),0,12,120),A.X,A.Y)}"/>`;lb+=`<text class="tk" x="${A.X(12)-3}" y="${A.Y(kn/2*o*o)-4}" text-anchor="end">${fmt(VT+o,1)} V</text>`});
+  gp+=`<path class="loc" d="${path(sample(v=>kn/2*v*v,0,4,40),A.X,A.Y)}"/>`;
+  if(ov>0)gp+=`<path class="cur" d="${path(sample(curve(ov),0,12,120),A.X,A.Y)}"/>`;
+  lb+=`<circle class="qpt" cx="${A.X(vds)}" cy="${A.Y(Id)}" r="7"/>`;
+  $('#smOut').innerHTML=A.wrap(gp,lb);
+  const x0=Math.floor(Math.min(0,VT-0.5)),x1=Math.max(6,VT+5);
+  const T=axes({id:'cM2',xmin:x0,xmax:x1,ymax:kn/2*Math.pow(x1-VT,2)*1.05,xl:'vGS (V)',yl:'ID (mA)',label:'Curva de transferência do MOSFET'});
+  const tp=`<path class="crv" style="stroke-width:2.6" d="${path(sample(v=>v<=VT?0:kn/2*(v-VT)*(v-VT),x0,x1,120),T.X,T.Y)}"/>`;
+  $('#smTr').innerHTML=T.wrap(tp,`<circle class="qpt" cx="${T.X(Math.min(Math.max(vgs,x0),x1))}" cy="${T.Y(kn/2*Math.pow(Math.max(ov,0),2))}" r="7"/>`);
+}
+$('#simM').addEventListener('input',simM);
+
+function solveMos(VDD,RD,VGS,VT,kn){
+  const ov=VGS-VT,st=[];
+  if(ov<=0){st.push(`V<sub>GS</sub> ≤ V<sub>T</sub>: <b>corte</b>. I<sub>D</sub> = 0 e V<sub>DS</sub> = V<sub>DD</sub> = ${fmt(VDD)} V`);return{reg:'corte',id:0,vds:VDD,steps:st}}
+  const id1=kn/2*ov*ov,vds1=VDD-id1*RD;
+  st.push(`Suponha saturação: I<sub>D</sub> = (k<sub>n</sub>/2)(V<sub>GS</sub> − V<sub>T</sub>)² = (${fmt(kn)}/2)·${fmt(ov)}² = <span class="r">${fmt(id1,3)} mA</span>`);
+  st.push(`Malha do dreno: V<sub>DS</sub> = V<sub>DD</sub> − I<sub>D</sub>·R<sub>D</sub> = ${fmt(VDD)} − ${fmt(id1,3)}·${fmt(RD)} = <span class="r">${fmt(vds1,3)} V</span>`);
+  if(vds1>=ov){st.push(`Teste: ${fmt(vds1,2)} ≥ V<sub>GS</sub> − V<sub>T</sub> = ${fmt(ov)}. A suposição vale: <b>saturação</b>.`);return{reg:'saturação',id:id1,vds:vds1,steps:st}}
+  st.push(`Teste: ${fmt(vds1,2)} &lt; ${fmt(ov)}. A suposição falhou, então refaça em <b>triodo</b>.`);
+  const a=kn/2,b=-(kn*ov+1/RD),c=VDD/RD,vds=(-b-Math.sqrt(b*b-4*a*c))/(2*a),id=(VDD-vds)/RD;
+  st.push(`Triodo: I<sub>D</sub> = k<sub>n</sub>[(V<sub>GS</sub> − V<sub>T</sub>)V<sub>DS</sub> − V<sub>DS</sub>²/2] e I<sub>D</sub> = (V<sub>DD</sub> − V<sub>DS</sub>)/R<sub>D</sub>. Igualando: ${fmt(a)}·V<sub>DS</sub>² − ${fmt(-b,3)}·V<sub>DS</sub> + ${fmt(c,3)} = 0`);
+  st.push(`Raiz menor: V<sub>DS</sub> = <span class="r">${fmt(vds,3)} V</span> e I<sub>D</sub> = (${fmt(VDD)} − ${fmt(vds,3)})/${fmt(RD)} = <span class="r">${fmt(id,3)} mA</span>. Teste: ${fmt(vds,2)} &lt; ${fmt(ov)}, confirmado: triodo.`);
+  return{reg:'triodo',id,vds,steps:st};
+}
+function simMs(){
+  const v=['Vdd','Rd','Vgs','Vt','Kn'].map(k=>+$('#ms'+k).value),out=$('#msSteps');
+  if(!(v[0]>0&&v[1]>0&&v[4]>0)){out.innerHTML='<li class="r">V<sub>DD</sub>, R<sub>D</sub> e k<sub>n</sub> precisam ser positivos.</li>';return}
+  const r=solveMos(v[0],v[1],v[2],v[3],v[4]);
+  out.innerHTML=r.steps.map(s=>`<li>${s}</li>`).join('')+`<li>Resultado: <span class="badge ${r.reg==='saturação'?'b-sat':r.reg==='corte'?'b-corte':'b-ativa'}">${r.reg}</span> · V<sub>DS</sub> = ${fmt(r.vds,2)} V · I<sub>D</sub> = ${fmt(r.id,2)} mA</li>`;
+}
+$('#simMs').addEventListener('input',simMs);
+$('#msEx').addEventListener('click',e=>{const b=e.target.closest('[data-ex]');if(!b)return;
+  $('#msVdd').value=10;$('#msRd').value=b.dataset.ex==='1'?1:2.5;$('#msVgs').value=3;$('#msVt').value=1;$('#msKn').value=2;simMs()});
+
+/* ======================================================================
+   EXERCÍCIOS
+   ====================================================================== */
+const TOP={tbj:'TBJ',pol:'Polarização',div:'Divisor',chave:'Chave',jfet:'JFET',mosfet:'MOSFET',ampop:'Amp-Op'};
+const mc=(id,topic,stmt,right,wrongs,why)=>({id,topic,fixed:1,make(){return{kind:'mc',stmt,opts:shuffle([{t:right,ok:1}].concat(wrongs.map(t=>({t,ok:0})))),why}}});
+const R1=x=>Math.round(x*10)/10;
+
+function polBase(){
+  const Vcc=rpick([12,15,20]),B=rpick([50,100,200]),Ic=rpick([50,100,150,200,300])/1000;
+  const Vce=rpick([R1(Vcc/2),R1(Vcc*.6),R1(Vcc*.4)]);
+  return{Vcc,Ic,Ib:Ic/B,Vce};
+}
+function polEm(){
+  const Vcc=rpick([12,15,16,20]),Ic=rpick([2,4,5,10])/1000,B=rpick([100,110,150,200]);
+  return{Vcc,Ic,B,Vce:R1(Vcc/2)};
+}
+const BANK=[
+ {id:'tbj-ic',topic:'tbj',make(){const B=rpick([50,100,110,150,200]),Ib=rpick([20,40,50,80,100]),ans=B*Ib/1000;
+  return{kind:'num',stmt:`Um TBJ com β = ${B} está na região ativa com I<sub>B</sub> = ${Ib} µA. Qual é I<sub>C</sub>?`,unit:'mA',ans,
+   hint:'I<sub>C</sub> = β · I<sub>B</sub>. Converta µA para mA dividindo por 1000.',
+   steps:[`I<sub>C</sub> = β · I<sub>B</sub> = ${B} · ${Ib} µA = ${B*Ib} µA`,`I<sub>C</sub> = <b>${fmt(ans,3)} mA</b>`]}}},
+ {id:'tbj-ie',topic:'tbj',make(){const [Ic,al]=rpick([[2,.95],[4,.98],[9.9,.99],[5,.96]]),ans=Ic/al;
+  return{kind:'num',stmt:`Um transistor tem α = ${fmt(al,2)} e I<sub>C</sub> = ${fmt(Ic)} mA. Qual é a corrente de emissor I<sub>E</sub>?`,unit:'mA',ans,
+   hint:'α = I<sub>C</sub> / I<sub>E</sub>, logo I<sub>E</sub> = I<sub>C</sub> / α.',
+   steps:[`I<sub>E</sub> = I<sub>C</sub> / α = ${fmt(Ic)} / ${fmt(al,2)}`,`I<sub>E</sub> = <b>${fmt(ans,3)} mA</b> (e I<sub>B</sub> = I<sub>E</sub> − I<sub>C</sub> = ${fmt(ans-Ic,3)} mA)`]}}},
+ {id:'tbj-beta',topic:'tbj',make(){const al=rpick([.9,.92,.95,.98,.99]),ans=al/(1-al);
+  return{kind:'num',stmt:`Um transistor tem α = ${fmt(al,2)}. Qual é o ganho de corrente β?`,unit:'',ans,
+   hint:'β = α / (1 − α).',
+   steps:[`β = α / (1 − α) = ${fmt(al,2)} / ${fmt(1-al,2)}`,`β = <b>${fmt(ans,1)}</b>`]}}},
+ {id:'tbj-pd',topic:'tbj',make(){const Ic=rpick([50,100,200,500]),Vce=rpick([2,5,6,10]),ans=Ic*Vce;
+  return{kind:'num',stmt:`Um transistor opera com I<sub>C</sub> = ${Ic} mA e V<sub>CE</sub> = ${Vce} V. Qual é a potência dissipada?`,unit:'mW',ans,
+   hint:'P<sub>D</sub> = I<sub>C</sub> · V<sub>CE</sub>. Com mA e V o resultado sai em mW.',
+   steps:[`P<sub>D</sub> = I<sub>C</sub> · V<sub>CE</sub> = ${Ic} mA · ${Vce} V`,`P<sub>D</sub> = <b>${ans} mW</b>`]}}},
+ {id:'tbj-diodo',topic:'tbj',make(){const Vs=rpick([5,10,12]),R=rpick([100,200,470]),ans=(Vs-0.7)/R*1000;
+  return{kind:'num',stmt:`Revisão de diodo: uma fonte de ${Vs} V alimenta um diodo de silício (queda de 0,7 V) em série com um resistor de ${R} Ω. Qual é a corrente?`,unit:'mA',ans,
+   hint:'A tensão no resistor é a da fonte menos a queda do diodo. Depois I = V/R.',
+   steps:[`V<sub>R</sub> = ${Vs} − 0,7 = ${fmt(Vs-0.7,2)} V`,`I = V<sub>R</sub> / R = ${fmt(Vs-0.7,2)} / ${R} = <b>${fmt(ans,2)} mA</b>`]}}},
+
+ {id:'pol-rb',topic:'pol',make(){const p=polBase(),ans=(p.Vcc-0.6)/p.Ib/1000;
+  return{kind:'num',stmt:`Polarização por corrente de base constante (V<sub>BE</sub> = 0,6 V). V<sub>CC</sub> = ${p.Vcc} V e ponto de operação I<sub>C</sub> = ${fmt(p.Ic*1000)} mA, V<sub>CE</sub> = ${fmt(p.Vce)} V, I<sub>B</sub> = ${fmt(p.Ib*1000,3)} mA. Qual é R<sub>B</sub>?`,unit:'kΩ',ans,
+   hint:'Primeiro V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub>. Depois R<sub>B</sub> = V<sub>RB</sub> / I<sub>B</sub>.',
+   steps:[`V<sub>RB</sub> = ${p.Vcc} − 0,6 = ${fmt(p.Vcc-0.6,2)} V`,`R<sub>B</sub> = ${fmt(p.Vcc-0.6,2)} / ${fmt(p.Ib,6)} = ${fmt(ans*1000,1)} Ω = <b>${fmt(ans,3)} kΩ</b>`]}}},
+ {id:'pol-rc',topic:'pol',make(){const p=polBase(),ans=(p.Vcc-p.Vce)/p.Ic;
+  return{kind:'num',stmt:`Polarização por corrente de base constante. V<sub>CC</sub> = ${p.Vcc} V, I<sub>C</sub> = ${fmt(p.Ic*1000)} mA e V<sub>CE</sub> = ${fmt(p.Vce)} V no ponto de operação. Qual é R<sub>C</sub>?`,unit:'Ω',ans,
+   hint:'A tensão em R<sub>C</sub> é V<sub>CC</sub> − V<sub>CE</sub>. Divida pela corrente de coletor em ampères.',
+   steps:[`V<sub>RC</sub> = ${p.Vcc} − ${fmt(p.Vce)} = ${fmt(p.Vcc-p.Vce,2)} V`,`R<sub>C</sub> = ${fmt(p.Vcc-p.Vce,2)} / ${fmt(p.Ic,3)} = <b>${fmt(ans,1)} Ω</b>`]}}},
+ {id:'pol-re',topic:'pol',make(){const p=polEm(),ans=0.1*p.Vcc/p.Ic;
+  return{kind:'num',stmt:`Emissor constante com V<sub>CC</sub> = ${p.Vcc} V e I<sub>E</sub> ≈ I<sub>C</sub> = ${fmt(p.Ic*1000)} mA. Use V<sub>RE</sub> = 10% de V<sub>CC</sub>. Qual é R<sub>E</sub>?`,unit:'Ω',ans,
+   hint:'R<sub>E</sub> = 0,1·V<sub>CC</sub> / I<sub>E</sub>.',
+   steps:[`V<sub>RE</sub> = 0,1 · ${p.Vcc} = ${fmt(0.1*p.Vcc,2)} V`,`R<sub>E</sub> = ${fmt(0.1*p.Vcc,2)} / ${fmt(p.Ic,3)} = <b>${fmt(ans,1)} Ω</b>`]}}},
+ {id:'pol-rc-em',topic:'pol',make(){const p=polEm(),ans=(0.9*p.Vcc-p.Vce)/p.Ic;
+  return{kind:'num',stmt:`Emissor constante com V<sub>CC</sub> = ${p.Vcc} V, I<sub>C</sub> = ${fmt(p.Ic*1000)} mA e V<sub>CE</sub> = ${fmt(p.Vce)} V (V<sub>RE</sub> = 10% de V<sub>CC</sub>). Qual é R<sub>C</sub>?`,unit:'Ω',ans,
+   hint:'V<sub>CC</sub> = V<sub>RC</sub> + V<sub>CE</sub> + V<sub>RE</sub>, então V<sub>RC</sub> = 0,9·V<sub>CC</sub> − V<sub>CE</sub>.',
+   steps:[`V<sub>RC</sub> = 0,9 · ${p.Vcc} − ${fmt(p.Vce)} = ${fmt(0.9*p.Vcc-p.Vce,2)} V`,`R<sub>C</sub> = ${fmt(0.9*p.Vcc-p.Vce,2)} / ${fmt(p.Ic,3)} = <b>${fmt(ans,1)} Ω</b>`]}}},
+ {id:'pol-rb-em',topic:'pol',make(){const p=polEm(),Ib=p.Ic/p.B,ans=(0.9*p.Vcc-0.6)/Ib/1000;
+  return{kind:'num',stmt:`Emissor constante com V<sub>CC</sub> = ${p.Vcc} V, I<sub>C</sub> = ${fmt(p.Ic*1000)} mA, β = ${p.B} e V<sub>BE</sub> = 0,6 V (V<sub>RE</sub> = 10% de V<sub>CC</sub>). Qual é R<sub>B</sub>?`,unit:'kΩ',ans,
+   hint:'Ache I<sub>B</sub> = I<sub>C</sub>/β. Depois V<sub>RB</sub> = 0,9·V<sub>CC</sub> − V<sub>BE</sub> e R<sub>B</sub> = V<sub>RB</sub>/I<sub>B</sub>.',
+   steps:[`I<sub>B</sub> = ${fmt(p.Ic*1000)} mA / ${p.B} = ${fmt(Ib*1e6,1)} µA`,`V<sub>RB</sub> = 0,9 · ${p.Vcc} − 0,6 = ${fmt(0.9*p.Vcc-0.6,2)} V`,`R<sub>B</sub> = ${fmt(0.9*p.Vcc-0.6,2)} / ${fmt(Ib,6)} = <b>${fmt(ans,1)} kΩ</b>`]}}},
+
+ {id:'chave-rb',topic:'chave',make(){const Vcc=rpick([5,9,12,15]),Ic=rpick([20,50,100,200]),Ib=Ic/1000/10,ans=(Vcc-0.6)/Ib;
+  return{kind:'num',stmt:`Transistor como chave, V<sub>CC</sub> = ${Vcc} V, carga de ${Ic} mA e V<sub>BE</sub> = 0,6 V. Projete para saturação forte (I<sub>B</sub> = I<sub>C</sub>/10) e calcule R<sub>B</sub>.`,unit:'Ω',ans,
+   hint:'I<sub>B</sub> = I<sub>C</sub>/10. Depois R<sub>B</sub> = (V<sub>CC</sub> − V<sub>BE</sub>) / I<sub>B</sub>.',
+   steps:[`I<sub>B</sub> = ${Ic} mA / 10 = ${fmt(Ic/10,2)} mA`,`R<sub>B</sub> = (${Vcc} − 0,6) / ${fmt(Ib,5)} = <b>${fmt(ans,1)} Ω</b>`]}}},
+ {id:'chave-rc',topic:'chave',make(){const Vcc=rpick([5,12,24]),Ic=rpick([50,100,200,500]),ans=Vcc/(Ic/1000);
+  return{kind:'num',stmt:`Um transistor saturado (V<sub>CE</sub> = 0) deve alimentar uma carga resistiva R<sub>C</sub> com ${Ic} mA a partir de V<sub>CC</sub> = ${Vcc} V. Qual é R<sub>C</sub>?`,unit:'Ω',ans,
+   hint:'Com V<sub>CE</sub> = 0, toda a tensão cai em R<sub>C</sub>.',
+   steps:[`R<sub>C</sub> = V<sub>CC</sub> / I<sub>C</sub> = ${Vcc} / ${fmt(Ic/1000,3)} = <b>${fmt(ans,1)} Ω</b>`]}}},
+ {id:'chave-ics',topic:'chave',make(){const Vcc=rpick([5,9,12,15]),Rc=rpick([47,100,120,220,470]),ans=Vcc/Rc*1000;
+  return{kind:'num',stmt:`Qual é a corrente de saturação I<sub>C(sat)</sub> de um circuito com V<sub>CC</sub> = ${Vcc} V e R<sub>C</sub> = ${Rc} Ω (considere V<sub>CE(sat)</sub> ≈ 0)?`,unit:'mA',ans,
+   hint:'É o ponto da reta de carga em que V<sub>CE</sub> = 0.',
+   steps:[`I<sub>C(sat)</sub> = V<sub>CC</sub> / R<sub>C</sub> = ${Vcc} / ${Rc} = <b>${fmt(ans,2)} mA</b>`]}}},
+ {id:'chave-sat',topic:'chave',make(){const Ic=rpick([100,200]),Rb=rpick([1000,2200,5600,15000,47000,100000]),B=100,Ib=(12-0.6)/Rb,ok=B*Ib*1000>=Ic;
+  return{kind:'mc',stmt:`Chave com V<sub>CC</sub> = V<sub>BB</sub> = 12 V, β = ${B}, V<sub>BE</sub> = 0,6 V e carga de ${Ic} mA. Com R<sub>B</sub> = ${fR(Rb)}, o transistor satura?`,
+   opts:shuffle([{t:'Sim, satura',ok:ok?1:0},{t:'Não, fica na região ativa',ok:ok?0:1}]),
+   why:`I<sub>B</sub> = (12 − 0,6)/${Rb} = ${fmt(Ib*1000,3)} mA. Então β·I<sub>B</sub> = ${fmt(B*Ib*1000,1)} mA, que é ${ok?'maior ou igual':'menor'} que I<sub>C</sub> = ${Ic} mA. ${ok?'Satura.':'Não satura.'}`}}},
+
+ {id:'jfet-id',topic:'jfet',make(){const Idss=rpick([4,6,8,10]),Vp=rpick([2,4,6,8]),f=rpick([.25,.5]),Vg=Vp*f,ans=Idss*Math.pow(1-f,2);
+  return{kind:'num',stmt:`Um JFET tem I<sub>DSS</sub> = ${Idss} mA e |V<sub>P</sub>| = ${Vp} V. Com |V<sub>GS</sub>| = ${fmt(Vg,2)} V, qual é I<sub>D</sub> na saturação?`,unit:'mA',ans,
+   hint:'I<sub>D</sub> = I<sub>DSS</sub> (1 − V<sub>GS</sub>/V<sub>P</sub>)². Use os módulos.',
+   steps:[`V<sub>GS</sub>/V<sub>P</sub> = ${fmt(Vg,2)} / ${Vp} = ${fmt(f,2)}`,`I<sub>D</sub> = ${Idss} · (1 − ${fmt(f,2)})² = <b>${fmt(ans,3)} mA</b>`]}}},
+ {id:'jfet-vdsp',topic:'jfet',make(){const Vp=rpick([4,6,8]),Vg=rpick([1,2,3]),ans=Vp-Vg;
+  return{kind:'num',stmt:`JFET com |V<sub>P</sub>| = ${Vp} V e |V<sub>GS</sub>| = ${Vg} V. Em qual valor de V<sub>DS</sub> ocorre o pinçamento (início da saturação)?`,unit:'V',ans,
+   hint:'V<sub>DS(P)</sub> = |V<sub>P</sub>| − |V<sub>GS</sub>|.',
+   steps:[`V<sub>DS(P)</sub> = ${Vp} − ${Vg} = <b>${ans} V</b>`]}}},
+ {id:'jfet-rs',topic:'jfet',make(){const [Vp,Idss]=rpick([[8,6],[2,4],[4,8],[6,6]]),ans=Vp/(Idss/1000);
+  return{kind:'num',stmt:`Autopolarização de um JFET. Pelo método do quadro, R<sub>S</sub> = V<sub>P</sub> / I<sub>DSS</sub>. Com V<sub>P</sub> = ${Vp} V e I<sub>DSS</sub> = ${Idss} mA, qual é R<sub>S</sub>?`,unit:'Ω',ans,
+   hint:'Converta I<sub>DSS</sub> para ampères antes de dividir.',
+   steps:[`R<sub>S</sub> = ${Vp} / ${fmt(Idss/1000,3)} = <b>${fmt(ans,1)} Ω</b>`]}}},
+ {id:'jfet-rd',topic:'jfet',make(){const s=rpick([{Vcc:14,Vds:7.5,Id:4,Vp:8,Idss:6},{Vcc:12,Vds:6,Id:2,Vp:8,Idss:6},{Vcc:15,Vds:7,Id:3,Vp:6,Idss:6},{Vcc:20,Vds:10,Id:5,Vp:4,Idss:8}]);
+  const Rs=s.Vp/(s.Idss/1000),Vrs=s.Id/1000*Rs,ans=(s.Vcc-s.Vds-Vrs)/(s.Id/1000);
+  return{kind:'num',stmt:`Autopolarização de um JFET: V<sub>CC</sub> = ${s.Vcc} V, V<sub>DS</sub> = ${fmt(s.Vds)} V, I<sub>D</sub> = ${s.Id} mA, V<sub>P</sub> = ${s.Vp} V e I<sub>DSS</sub> = ${s.Idss} mA. Use R<sub>S</sub> = V<sub>P</sub>/I<sub>DSS</sub>. Qual é R<sub>D</sub>?`,unit:'Ω',ans,
+   hint:'Ache R<sub>S</sub> e V<sub>RS</sub> = I<sub>D</sub>·R<sub>S</sub>. Depois R<sub>D</sub> = (V<sub>CC</sub> − V<sub>DS</sub> − V<sub>RS</sub>) / I<sub>D</sub>.',
+   steps:[`R<sub>S</sub> = ${s.Vp} / ${fmt(s.Idss/1000,3)} = ${fmt(Rs,1)} Ω`,`V<sub>RS</sub> = ${fmt(s.Id/1000,3)} · ${fmt(Rs,1)} = ${fmt(Vrs,2)} V`,`R<sub>D</sub> = (${s.Vcc} − ${fmt(s.Vds)} − ${fmt(Vrs,2)}) / ${fmt(s.Id/1000,3)} = <b>${fmt(ans,1)} Ω</b>`]}}},
+
+ {id:'mos-id',topic:'mosfet',make(){const kn=rpick([1,2,4]),VT=rpick([1,1.5,2]),ov=rpick([1,2,3]),vgs=VT+ov,ans=kn/2*ov*ov;
+  return{kind:'num',stmt:`MOSFET de enriquecimento, canal N, com k<sub>n</sub> = ${kn} mA/V² e V<sub>T</sub> = ${fmt(VT)} V. Com v<sub>GS</sub> = ${fmt(vgs)} V e v<sub>DS</sub> alto o bastante para saturar, qual é I<sub>D</sub>?`,unit:'mA',ans,
+   hint:'I<sub>D</sub> = (k<sub>n</sub>/2)(v<sub>GS</sub> − V<sub>T</sub>)².',
+   steps:[`v<sub>GS</sub> − V<sub>T</sub> = ${fmt(vgs)} − ${fmt(VT)} = ${fmt(ov)} V`,`I<sub>D</sub> = (${kn}/2) · ${fmt(ov)}² = <b>${fmt(ans,3)} mA</b>`]}}},
+ {id:'mos-reg',topic:'mosfet',make(){const c=rpick(['corte','triodo','saturação']),VT=rpick([1,1.5,2]);let vgs,vds;
+  if(c==='corte'){vgs=VT-rpick([.5,1]);vds=rpick([2,5,8])}
+  else if(c==='triodo'){const o=rpick([2,3,4]);vgs=VT+o;vds=rpick([.5,1,1.5])}
+  else{const o=rpick([1,2,3]);vgs=VT+o;vds=o+rpick([1,3,5])}
+  const ov=vgs-VT;
+  return{kind:'mc',stmt:`MOSFET de enriquecimento canal N com V<sub>T</sub> = ${fmt(VT)} V, v<sub>GS</sub> = ${fmt(vgs)} V e v<sub>DS</sub> = ${fmt(vds)} V. Em que região ele opera?`,
+   opts:['corte','triodo','saturação'].map(t=>({t:t[0].toUpperCase()+t.slice(1),ok:t===c?1:0})),
+   why:c==='corte'?`v<sub>GS</sub> = ${fmt(vgs)} V está abaixo de V<sub>T</sub> = ${fmt(VT)} V, então não há canal: corte.`
+     :c==='triodo'?`v<sub>GS</sub> − V<sub>T</sub> = ${fmt(ov)} V e v<sub>DS</sub> = ${fmt(vds)} V é menor: triodo.`
+     :`v<sub>GS</sub> − V<sub>T</sub> = ${fmt(ov)} V e v<sub>DS</sub> = ${fmt(vds)} V é maior ou igual: saturação.`}}},
+ {id:'mos-solve',topic:'mosfet',make(){const VDD=rpick([10,12]),RD=rpick([.5,1,2.5,5]),VGS=rpick([3,4]),VT=1,kn=rpick([1,2,4]),r=solveMos(VDD,RD,VGS,VT,kn);
+  return{kind:'num',stmt:`MOSFET de enriquecimento (k<sub>n</sub> = ${kn} mA/V², V<sub>T</sub> = ${VT} V) com v<sub>GS</sub> fixo em ${VGS} V, V<sub>DD</sub> = ${VDD} V e R<sub>D</sub> = ${fmt(RD)} kΩ. Suponha saturação, verifique e, se preciso, refaça em triodo. Qual é V<sub>DS</sub>?`,unit:'V',ans:r.vds,
+   hint:'Calcule I<sub>D</sub> supondo saturação, depois V<sub>DS</sub> = V<sub>DD</sub> − I<sub>D</sub>·R<sub>D</sub>. Se V<sub>DS</sub> &lt; v<sub>GS</sub> − V<sub>T</sub>, a suposição falhou e vale o triodo.',
+   steps:r.steps}}},
+
+ mc('c-reg','tbj','Em qual região o TBJ funciona como amplificador?','Região ativa',['Corte','Saturação','Ruptura'],'Na região ativa a junção BE está direta e a BC reversa, e I<sub>C</sub> = β·I<sub>B</sub>.'),
+ mc('c-sat','tbj','Quais são as polarizações das junções do TBJ em saturação?','BE direta e BC direta',['BE direta e BC reversa','BE reversa e BC reversa','BE reversa e BC direta'],'Em saturação as duas junções conduzem e V<sub>CE</sub> ≈ 0.'),
+ mc('c-corte','tbj','Com o TBJ em corte, V<sub>CE</sub> é aproximadamente:','V<sub>CC</sub>',['0 V','0,6 V','V<sub>CC</sub>/2'],'Sem corrente, não há queda em R<sub>C</sub>, então toda a tensão cai no transistor.'),
+ mc('c-alfa','tbj','A definição correta de α é:','I<sub>C</sub> / I<sub>E</sub>, um pouco menor que 1',['I<sub>C</sub> / I<sub>B</sub>, bem maior que 1','I<sub>E</sub> / I<sub>C</sub>, maior que 1','I<sub>B</sub> / I<sub>C</sub>, bem menor que 1'],'Parte da corrente do emissor sai pela base, então α fica entre 0,9 e 0,99. O quociente I<sub>C</sub>/I<sub>B</sub> é o β.'),
+ mc('c-seta','tbj','No símbolo de um transistor NPN, a seta do emissor aponta:','Para fora do transistor',['Para dentro do transistor','Para a base','Para o coletor'],'NPN: seta para fora. PNP: seta para dentro.'),
+ mc('c-base','tbj','Por que a base do TBJ é fina e pouco dopada?','Para quase todos os portadores do emissor chegarem ao coletor',['Para dissipar mais calor','Para aumentar a corrente de base','Para evitar que o emissor conduza'],'Assim mais de 95% dos portadores injetados atravessam a base e menos de 5% saem pela base.'),
+ mc('c-calor','tbj','Em que terminal o TBJ dissipa a maior parte do calor?','Coletor',['Base','Emissor','Todos igualmente'],'P<sub>D</sub> = I<sub>C</sub>·V<sub>CE</sub>, e a região do coletor é a maior e a que mais esquenta.'),
+ mc('c-vbe','pol','Que valor de V<sub>BE</sub> o professor usa nas contas do quadro?','0,6 V',['0,7 V','0,3 V','1,2 V'],'Os slides usam 0,7 V, mas as contas do quadro usam 0,6 V.'),
+ mc('c-re','pol','Qual é a função do resistor R<sub>E</sub> na polarização por emissor constante?','Estabilizar o ponto de operação quando o β varia',['Aumentar o β','Eliminar a corrente de base','Aumentar V<sub>CE</sub> sempre'],'R<sub>E</sub> realimenta o circuito e mantém I<sub>C</sub> quase constante. A regra do quadro é V<sub>RE</sub> ≈ 10% de V<sub>CC</sub>.'),
+ mc('c-q','pol','O ponto de operação Q de um TBJ fica:','Sobre a reta de carga, na curva da I<sub>B</sub> escolhida',['Sempre na saturação','Sempre em V<sub>CE</sub> = V<sub>CC</sub>','Fora da reta de carga'],'A reta de carga liga I<sub>C(sat)</sub> a V<sub>CE(corte)</sub>, e Q é a interseção com a curva de I<sub>B</sub>.'),
+ mc('c-forte','chave','Qual é a regra de projeto para saturação forte de um TBJ como chave?','I<sub>B</sub> = I<sub>C</sub> / 10',['I<sub>B</sub> = I<sub>C</sub> · β','I<sub>B</sub> = V<sub>CC</sub> / 10','I<sub>B</sub> = I<sub>E</sub> · 10'],'Dar mais base do que I<sub>C</sub>/β garante saturar mesmo se o β cair.'),
+ mc('c-led','chave','No circuito 2 do slide (LED em paralelo com o transistor), o que acontece com a chave aberta (transistor em corte)?','O LED acende',['O LED apaga','O transistor satura','O LED queima'],'Em corte o transistor tem alta impedância, e a corrente desvia para o LED. Saturado, ele desvia a corrente e o LED apaga.'),
+ mc('c-diodo','chave','Para que serve o diodo em antiparalelo com a bobina de um relé?','Proteger o transistor do pico gerado ao desligar a bobina',['Aumentar a corrente da bobina','Reduzir o β','Acender um LED indicador'],'Cargas indutivas geram um pico de tensão ao desligar. O diodo dá um caminho de baixa resistência.'),
+ mc('c-ldr','chave','No circuito com LDR que liga o relé no escuro, o que acontece quando escurece?','A resistência do LDR sobe, a corrente vai para a base e o transistor satura',['A resistência do LDR cai e o transistor corta','O LDR gera tensão e carrega a base','O relé desliga'],'Com luz, o LDR tem resistência baixa e drena a corrente. No escuro, a corrente segue para a base e o relé liga.'),
+ mc('c-reed','chave','No alarme com reed switch, a sirene toca quando:','A porta abre e o ímã se afasta do sensor',['A porta fecha e o ímã se aproxima','O sensor perde a tensão de alimentação','O transistor entra em corte'],'Ao afastar o ímã, o contato fecha, o transistor recebe I<sub>B</sub>, satura e aciona o relé.'),
+ mc('c-fet','jfet','O FET é controlado por:','Tensão entre porta e fonte',['Corrente de base','Corrente de coletor','Temperatura'],'No FET, V<sub>GS</sub> controla I<sub>D</sub>. A corrente de porta é praticamente nula.'),
+ mc('c-jpol','jfet','A junção porta-canal de um JFET em operação normal fica:','Polarizada reversamente',['Polarizada diretamente','Em curto','Sem polarização nenhuma'],'Assim a corrente de porta é quase zero e a impedância de entrada é alta.'),
+ mc('c-pinch','jfet','Quando |V<sub>GS</sub>| = |V<sub>P</sub>|, a corrente de dreno do JFET é:','Zero',['I<sub>DSS</sub>','I<sub>DSS</sub>/2','Máxima'],'A depleção ocupa o canal todo e a corrente é cortada.'),
+ mc('c-idss','jfet','O que é I<sub>DSS</sub>?','A corrente de dreno de saturação com V<sub>GS</sub> = 0',['A corrente de porta','A corrente máxima de ruptura','A corrente no corte'],'É a corrente máxima de saturação do JFET, com a porta em 0 V.'),
+ mc('c-ohm','jfet','Na região ôhmica do JFET, a corrente de dreno:','Cresce com V<sub>DS</sub>, como num resistor',['Fica constante','É sempre zero','Diminui com V<sub>DS</sub>'],'Na saturação a corrente fica quase constante; na região ôhmica ela cresce com V<sub>DS</sub>.'),
+ mc('c-md','mosfet','Sem tensão na porta, um MOSFET de depleção:','Conduz',['Não conduz','Está sempre saturado','Está em ruptura'],'O de depleção já tem canal. O de enriquecimento só conduz depois de passar V<sub>T</sub>.'),
+ mc('c-ox','mosfet','Por que o MOSFET tem impedância de entrada altíssima?','A porta é isolada do canal por uma camada de óxido',['A porta é uma junção PN reversa','O substrato é ligado ao dreno','Ele tem três junções'],'O óxido forma um capacitor com o canal e não há corrente de porta.'),
+ mc('c-sm','mosfet','Qual é a condição de saturação de um MOSFET de enriquecimento canal N?','v<sub>GS</sub> &gt; V<sub>T</sub> e v<sub>DS</sub> ≥ v<sub>GS</sub> − V<sub>T</sub>',['v<sub>GS</sub> &lt; V<sub>T</sub>','v<sub>DS</sub> &lt; v<sub>GS</sub> − V<sub>T</sub>','v<sub>GS</sub> = 0'],'Se v<sub>DS</sub> &lt; v<sub>GS</sub> − V<sub>T</sub> é triodo, e se v<sub>GS</sub> &lt; V<sub>T</sub> é corte.'),
+ mc('c-amp','mosfet','Em qual região o MOSFET é usado para amplificar?','Saturação (corrente constante)',['Corte','Triodo','Qualquer uma'],'Na saturação I<sub>D</sub> depende de v<sub>GS</sub> e quase não de v<sub>DS</sub>. O triodo age como resistência controlada.')
+];
+/* ======================================================================
+   Exercícios extras: divisor de tensão e amplificador operacional
+   ====================================================================== */
+const sgn=(v,d)=>fmt(v,d);
+const EXTRA=[
+ {id:'ao-inv',topic:'ampop',make(){const R1=rpick([1,2.2,4.7,10]),k=rpick([2,4.7,10,22]),Rf=Math.round(R1*k*10)/10,Ve=rpick([.1,.2,.3,.5]),ans=-Rf/R1*Ve;
+  return{kind:'num',stmt:`Amplificador operacional ideal na configuração inversora, com R<sub>1</sub> = ${fmt(R1)} kΩ, R<sub>F</sub> = ${fmt(Rf)} kΩ e V<sub>e</sub> = ${fmt(Ve)} V. Qual é V<sub>S</sub>? Inclua o sinal.`,unit:'V',ans,
+   hint:'V<sub>S</sub> = −(R<sub>F</sub>/R<sub>1</sub>)·V<sub>e</sub>.',steps:[`A<sub>V</sub> = −${fmt(Rf)}/${fmt(R1)} = ${fmt(-Rf/R1,3)}`,`V<sub>S</sub> = ${fmt(-Rf/R1,3)} · ${fmt(Ve)} = <b>${fmt(ans,3)} V</b>`]}}},
+ {id:'ao-non',topic:'ampop',make(){const R1=rpick([1,2.2,10]),k=rpick([4,9,19,49]),Rf=R1*k,ans=1+k;
+  return{kind:'num',stmt:`Amplificador não inversor ideal com R<sub>1</sub> = ${fmt(R1)} kΩ e R<sub>F</sub> = ${fmt(Rf)} kΩ. Qual é o ganho de tensão?`,unit:'',ans,
+   hint:'A<sub>V</sub> = 1 + R<sub>F</sub>/R<sub>1</sub>.',steps:[`A<sub>V</sub> = 1 + ${fmt(Rf)}/${fmt(R1)} = <b>${fmt(ans,2)}</b>`]}}},
+ {id:'ao-db',topic:'ampop',make(){const Av=rpick([5,10,20,50,100,1000]),ans=20*Math.log10(Av);
+  return{kind:'num',stmt:`Um amplificador tem ganho de tensão ${Av}. Qual é o ganho em decibéis?`,unit:'dB',ans,
+   hint:'A<sub>V(dB)</sub> = 20·log|A<sub>V</sub>|.',steps:[`A<sub>V(dB)</sub> = 20·log(${Av}) = <b>${fmt(ans,2)} dB</b>`]}}},
+ {id:'ao-il',topic:'ampop',make(){const R1=1,k=rpick([4,9]),Ve=rpick([.5,1]),RL=rpick([1,2,5,10]),Vs=(1+k)*Ve,ans=Vs/RL;
+  return{kind:'num',stmt:`Não inversor ideal com R<sub>1</sub> = 1 kΩ, R<sub>F</sub> = ${k} kΩ, V<sub>e</sub> = ${fmt(Ve)} V e carga R<sub>L</sub> = ${fmt(RL)} kΩ. Qual é a corrente na carga?`,unit:'mA',ans,
+   hint:'Ache V<sub>S</sub> = (1 + R<sub>F</sub>/R<sub>1</sub>)·V<sub>e</sub> e depois I<sub>L</sub> = V<sub>S</sub>/R<sub>L</sub>.',steps:[`V<sub>S</sub> = ${1+k} · ${fmt(Ve)} = ${fmt(Vs,2)} V`,`I<sub>L</sub> = ${fmt(Vs,2)} V / ${fmt(RL)} kΩ = <b>${fmt(ans,3)} mA</b>`]}}},
+ {id:'ao-io',topic:'ampop',make(){const k=rpick([4,9,10]),RL=rpick([1,2.2,5]),Ve=1,IF=Ve,IL=(1+k)*Ve/RL,ans=IF+IL;
+  return{kind:'num',stmt:`Não inversor com R<sub>1</sub> = 1 kΩ, R<sub>F</sub> = ${k} kΩ, V<sub>e</sub> = 1 V e R<sub>L</sub> = ${fmt(RL)} kΩ. Qual é a corrente de saída total do AO (I<sub>O</sub> = I<sub>F</sub> + I<sub>L</sub>)?`,unit:'mA',ans,
+   hint:'I<sub>F</sub> = V<sub>e</sub>/R<sub>1</sub> e I<sub>L</sub> = V<sub>S</sub>/R<sub>L</sub>.',steps:[`I<sub>F</sub> = 1 V / 1 kΩ = 1 mA`,`V<sub>S</sub> = ${1+k} V e I<sub>L</sub> = ${1+k} / ${fmt(RL)} = ${fmt(IL,3)} mA`,`I<sub>O</sub> = 1 + ${fmt(IL,3)} = <b>${fmt(ans,3)} mA</b>`]}}},
+ {id:'ao-som',topic:'ampop',make(){const R=rpick([1,2,5,10]),Rf=rpick([5,10,20]),v=[rpick([.1,.2,.5]),rpick([.1,.3]),rpick([.2,.4])],s=v[0]+v[1]+v[2],ans=-Rf/R*s;
+  return{kind:'num',stmt:`Somador inversor com R<sub>1</sub> = R<sub>2</sub> = R<sub>3</sub> = ${fmt(R)} kΩ e R<sub>F</sub> = ${fmt(Rf)} kΩ. As entradas são V<sub>1</sub> = ${fmt(v[0])} V, V<sub>2</sub> = ${fmt(v[1])} V e V<sub>3</sub> = ${fmt(v[2])} V. Qual é V<sub>S</sub>?`,unit:'V',ans,
+   hint:'V<sub>S</sub> = −(R<sub>F</sub>/R)·(V<sub>1</sub> + V<sub>2</sub> + V<sub>3</sub>), já que as três resistências são iguais.',steps:[`V<sub>1</sub> + V<sub>2</sub> + V<sub>3</sub> = ${fmt(s,2)} V`,`V<sub>S</sub> = −(${fmt(Rf)}/${fmt(R)}) · ${fmt(s,2)} = <b>${fmt(ans,3)} V</b>`]}}},
+ {id:'ao-sub',topic:'ampop',make(){const k=rpick([2,5,10]),V1=rpick([.5,1,1.5]),V2=V1+rpick([.1,.2,.4]),ans=k*(V2-V1);
+  return{kind:'num',stmt:`Subtrator com ganho R<sub>F</sub>/R<sub>1</sub> = ${k}, V<sub>1</sub> = ${fmt(V1)} V na entrada (−) e V<sub>2</sub> = ${fmt(V2,2)} V na entrada (+). Qual é V<sub>S</sub>?`,unit:'V',ans,
+   hint:'V<sub>S</sub> = (R<sub>F</sub>/R<sub>1</sub>)(V<sub>2</sub> − V<sub>1</sub>).',steps:[`V<sub>S</sub> = ${k} · (${fmt(V2,2)} − ${fmt(V1)}) = <b>${fmt(ans,3)} V</b>`]}}},
+ {id:'ao-funit',topic:'ampop',make(){const tr=rpick([.35,.3,.5,.7]),ans=0.35/tr;
+  return{kind:'num',stmt:`O fabricante informa um tempo de subida t<sub>r</sub> = ${fmt(tr)} µs. Qual é a frequência unitária f<sub>unit</sub>?`,unit:'MHz',ans,
+   hint:'f<sub>unit</sub> = 0,35 / t<sub>r</sub>. Com t<sub>r</sub> em µs o resultado sai em MHz.',steps:[`f<sub>unit</sub> = 0,35 / ${fmt(tr)} µs = <b>${fmt(ans,3)} MHz</b>`]}}},
+ {id:'ao-fc',topic:'ampop',make(){const Av=rpick([10,50,100,200,1000]),ans=1000/Av;
+  return{kind:'num',stmt:`Um AO com f<sub>unit</sub> = 1 MHz é configurado para ganho ${Av}. Qual é a frequência de corte em malha fechada?`,unit:'kHz',ans,
+   hint:'f<sub>c</sub> = f<sub>unit</sub> / A<sub>V</sub>.',steps:[`f<sub>c</sub> = 1 MHz / ${Av} = <b>${fmt(ans,3)} kHz</b>`]}}},
+ {id:'ao-sr',topic:'ampop',make(){const SR=rpick([.12,.5,1]),Vp=rpick([5,10,12]),ans=SR*1e6/(2*Math.PI*Vp)/1000;
+  return{kind:'num',stmt:`Um AO tem slew rate de ${fmt(SR)} V/µs. Qual a máxima frequência sem distorção para uma saída de ${Vp} V de pico?`,unit:'kHz',ans,
+   hint:'f = SR / (2π·V<sub>P</sub>). Converta SR para V/s.',steps:[`SR = ${fmt(SR*1e6,0)} V/s`,`f = ${fmt(SR*1e6,0)} / (2π · ${Vp}) = <b>${fmt(ans,3)} kHz</b>`]}}},
+ {id:'ao-rrmc',topic:'ampop',make(){const db=rpick([60,80,90,100]),ans=Math.pow(10,db/20);
+  return{kind:'num',stmt:`Um AO tem RRMC de ${db} dB. Quantas vezes o sinal diferencial é amplificado a mais que o sinal comum (A<sub>d</sub>/A<sub>c</sub>)?`,unit:'vezes',ans,
+   hint:'RRMC = 20·log(A<sub>d</sub>/A<sub>c</sub>), então A<sub>d</sub>/A<sub>c</sub> = 10<sup>RRMC/20</sup>.',steps:[`A<sub>d</sub>/A<sub>c</sub> = 10<sup>${db}/20</sup> = <b>${fmt(ans,1)}</b>`]}}},
+ mc('a-inv','ampop','Qual entrada do AO inverte a polaridade do sinal amplificado?','Entrada inversora (−)',['Entrada não inversora (+)','Alimentação −V<sub>CC</sub>','Pino de offset'],'Um sinal na entrada (−) sai amplificado e invertido. Na (+), sai amplificado e com a mesma polaridade.'),
+ mc('a-tv','ampop','No inversor ideal, a entrada (−) fica em 0 V sem estar ligada ao terra. Esse conceito se chama:','Terra virtual',['Curto real','Modo comum','Saturação'],'Com realimentação negativa as duas entradas ficam com a mesma tensão. Como a (+) está no terra, a (−) também fica em 0 V.'),
+ mc('a-cmp','ampop','Um AO sem nenhum resistor de realimentação funciona como:','Comparador, com a saída saturada em um dos extremos',['Amplificador de ganho 1','Amplificador de ganho 10','Seguidor de tensão'],'Em malha aberta o ganho é altíssimo, e a saída vai para +V<sub>sat</sub> ou −V<sub>sat</sub> conforme qual entrada é maior.'),
+ mc('a-buf','ampop','Qual é o principal uso do seguidor de tensão (buffer)?','Casar impedâncias entre uma fonte de alta impedância e uma carga de baixa',['Amplificar a tensão 10 vezes','Inverter o sinal','Somar sinais'],'Ganho 1, sem inversão. Ele isola os estágios e reforça corrente.'),
+ mc('a-sat','ampop','O que ocorre quando a saída calculada passa de ±V<sub>CC</sub>?','A saída satura perto de ±V<sub>CC</sub> e os cálculos lineares deixam de valer',['O ganho aumenta','O AO inverte o sinal','A entrada satura'],'A excursão máxima fica entre +V<sub>sat</sub> e −V<sub>sat</sub>, um pouco abaixo da alimentação.'),
+ mc('a-25','ampop','Qual é a corrente máxima de saída do 741?','25 mA',['2,5 mA','250 mA','2,5 A'],'Acima disso é preciso um reforçador de corrente, com transistor na saída.'),
+ mc('a-zin','ampop','No AO ideal, as impedâncias de entrada e de saída são, respectivamente:','Infinita e nula',['Nula e infinita','Infinita e infinita','Nula e nula'],'O 741 real tem cerca de 2 MΩ na entrada e 75 Ω na saída.'),
+ mc('a-nin','ampop','O ganho do amplificador não inversor é sempre:','Maior ou igual a 1',['Negativo','Menor que 1','Igual a −R<sub>F</sub>/R<sub>1</sub>'],'A<sub>V</sub> = 1 + R<sub>F</sub>/R<sub>1</sub>, que nunca é menor que 1.'),
+ mc('a-rrmc','ampop','O que o RRMC (CMRR) mede?','A capacidade de rejeitar sinais comuns às duas entradas',['A corrente máxima de saída','A velocidade de subida da saída','A tensão de offset'],'Quanto maior, melhor o AO elimina interferências que chegam iguais nas duas entradas.'),
+ mc('a-estavel','ampop','Entre inversor e não inversor, qual o material diz ser o mais usado por ser mais estável?','Inversor',['Não inversor','Os dois são iguais','Nenhum'],'O inversor também permite ajustar o ganho desde zero e tem terra virtual.'),
+ {id:'dv-rb2',topic:'div',make(){const VRE=rpick([1,1.2,1.5]),IC=rpick([10,20,25]),B=100,VBE=.7,IB=IC/1000/B,ans=(VBE+VRE)/(10*IB);
+  return{kind:'num',stmt:`Divisor de tensão com V<sub>BE</sub> = 0,7 V, V<sub>RE</sub> = ${fmt(VRE)} V, I<sub>C</sub> = ${IC} mA, β = ${B} e I<sub>B2</sub> = 10·I<sub>B</sub>. Qual é R<sub>B2</sub>?`,unit:'Ω',ans,
+   hint:'V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub>. Depois R<sub>B2</sub> = V<sub>B</sub> / I<sub>B2</sub>.',steps:[`I<sub>B</sub> = ${IC} mA / ${B} = ${fmt(IB*1000,3)} mA e I<sub>B2</sub> = ${fmt(10*IB*1000,2)} mA`,`V<sub>B</sub> = 0,7 + ${fmt(VRE)} = ${fmt(VBE+VRE,2)} V`,`R<sub>B2</sub> = ${fmt(VBE+VRE,2)} / ${fmt(10*IB,5)} = <b>${fmt(ans,1)} Ω</b>`]}}},
+ {id:'dv-rb1',topic:'div',make(){const VCC=rpick([10,12,15]),VRE=rpick([1,1.2,1.5]),IC=rpick([10,20,25]),B=100,VBE=.7,IB=IC/1000/B,IB2=10*IB,VB=VBE+VRE,ans=(VCC-VB)/(IB2+IB)/1000;
+  return{kind:'num',stmt:`Divisor de tensão com V<sub>CC</sub> = ${VCC} V, V<sub>BE</sub> = 0,7 V, V<sub>RE</sub> = ${fmt(VRE)} V, I<sub>C</sub> = ${IC} mA, β = ${B} e I<sub>B2</sub> = 10·I<sub>B</sub>. Considere que por R<sub>B1</sub> passa I<sub>B2</sub> + I<sub>B</sub>. Qual é R<sub>B1</sub>?`,unit:'kΩ',ans,
+   hint:'R<sub>B1</sub> = (V<sub>CC</sub> − V<sub>B</sub>) / (I<sub>B2</sub> + I<sub>B</sub>), com V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub>.',steps:[`I<sub>B</sub> = ${fmt(IB*1000,3)} mA, I<sub>B2</sub> = ${fmt(IB2*1000,2)} mA e a soma é ${fmt((IB+IB2)*1000,3)} mA`,`V<sub>B</sub> = ${fmt(VB,2)} V e V<sub>RB1</sub> = ${VCC} − ${fmt(VB,2)} = ${fmt(VCC-VB,2)} V`,`R<sub>B1</sub> = ${fmt(VCC-VB,2)} / ${fmt(IB+IB2,6)} = <b>${fmt(ans,3)} kΩ</b>`]}}},
+ mc('dv-vb','div','Qual é a tensão na base de um transistor com V<sub>RE</sub> no emissor?','V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub>',['V<sub>B</sub> = V<sub>CC</sub> − V<sub>BE</sub>','V<sub>B</sub> = V<sub>CE</sub> + V<sub>RE</sub>','V<sub>B</sub> = V<sub>RE</sub> − V<sub>BE</sub>'],'A base fica uma queda V<sub>BE</sub> acima do emissor. É essa tensão que o divisor R<sub>B1</sub>/R<sub>B2</sub> precisa fornecer.'),
+ mc('dv-why','div','Por que se escolhe I<sub>B2</sub> = 10·I<sub>B</sub> no divisor?','Para a tensão da base ficar quase independente do β',['Para o transistor saturar','Para eliminar R<sub>E</sub>','Para aumentar I<sub>B</sub>'],'Se a corrente do divisor é bem maior que I<sub>B</sub>, a variação de I<sub>B</sub> quase não mexe em V<sub>B</sub>.'),
+ mc('dv-ve','div','Qual a vantagem do divisor de tensão sobre a base constante?','Ponto de operação bem mais estável quando o β varia',['Usa menos resistores','Dispensa V<sub>CC</sub>','Dispensa R<sub>C</sub>'],'Com V<sub>B</sub> fixa e R<sub>E</sub> no emissor, I<sub>E</sub> = (V<sub>B</sub> − V<sub>BE</sub>)/R<sub>E</sub> quase não depende do β.')
+];
+
+BANK.push(...EXTRA);
+const BYID={};BANK.forEach(q=>BYID[q.id]=q);
+
+let exFilter='all',exMode='list',simIds=[];
+const inst={},sess={a:0,c:0};
+let done=store.get('done',{});
+const inst_get=(id,fresh)=>{if(fresh||!inst[id])inst[id]=Object.assign({scored:false,firstOk:false,tries:0},BYID[id].make());return inst[id]};
+
+function exCard(id,i){
+  const it=inst_get(id),q=BYID[id],el=document.createElement('article');
+  el.className='qcard';el.dataset.id=id;el.dataset.i=i;
+  const reset=it.kind==='num'?'<button type="button" class="lnk" data-a="regen">Nova variante</button>':'<button type="button" class="lnk" data-a="redo">Refazer</button>';
+  el.innerHTML=`<div class="qh"><span class="qn">Q${i+1}</span><span class="tag">${TOP[q.topic]}</span><span class="tag">${it.kind==='num'?'cálculo':'conceito'}</span><span class="grow"></span>${reset}</div>
+  <div class="qs">${it.stmt}</div>
+  ${it.kind==='num'
+   ?`<div class="ans"><input type="text" inputmode="decimal" autocomplete="off" aria-label="Sua resposta" placeholder="resposta"><span class="u">${it.unit}</span><button type="button" class="btn primary" data-a="chk">Verificar</button></div>`
+   :`<div class="opts">${it.opts.map((o,k)=>`<button type="button" class="opt" data-a="opt" data-k="${k}">${o.t}</button>`).join('')}</div>`}
+  <div class="fb" aria-live="polite"></div>
+  ${it.kind==='num'?'<div class="qa"><button type="button" class="btn" data-a="hint">Dica</button><button type="button" class="btn" data-a="sol">Ver resolução</button></div>':''}
+  <div class="note n-blue hint" hidden></div>
+  ${it.kind==='num'?`<ol class="steps sol" hidden>${it.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`:''}`;
+  return el;
+}
+function score(id,it,ok){
+  if(!it.scored){it.scored=true;it.firstOk=ok;sess.a++;if(ok)sess.c++}
+  if(ok&&!done[id]){done[id]=1;store.set('done',done)}
+  exSum();
+}
+function exSum(){
+  const total=BANK.length,d=Object.keys(done).filter(k=>BYID[k]).length;
+  let h=`<b>Sessão:</b> ${sess.c} certas de ${sess.a} respondidas <span style="color:var(--muted)">·</span> <b>Dominados:</b> ${d} de ${total}`;
+  $('#exSum').innerHTML=h;
+  const b=$('#exBanner');
+  if(exMode!=='sim'){b.innerHTML='';return}
+  const its=simIds.map(id=>inst[id]),ans=its.filter(i=>i.scored).length,ok=its.filter(i=>i.firstOk).length;
+  if(ans<simIds.length){b.innerHTML=`<div class="note n-blue"><p><b>Simulado em andamento:</b> ${ans} de ${simIds.length} respondidas, ${ok} certas na primeira tentativa. <button type="button" class="lnk" data-a="leave">Sair do simulado</button></p></div>`;return}
+  const wrong={};simIds.forEach(id=>{if(!inst[id].firstOk)wrong[BYID[id].topic]=(wrong[BYID[id].topic]||0)+1});
+  const weak=Object.keys(wrong).map(t=>TOP[t]);
+  b.innerHTML=`<div class="note ${ok/simIds.length>=.8?'':ok/simIds.length>=.5?'n-amber':'n-red'}"><p><b>Resultado: ${ok} de ${simIds.length} (${Math.round(ok/simIds.length*100)}%).</b> ${weak.length?'Revise: '+weak.join(', ')+'.':'Nenhum erro na primeira tentativa.'} <button type="button" class="lnk" data-a="leave">Voltar à lista</button> · <button type="button" class="lnk" data-a="again">Novo simulado</button></p></div>`;
+}
+function renderEx(){
+  $('#exSim').textContent='Simulado de '+(Object.keys(TOP).length*2);
+  const tabs=[['all','Todos'],['tbj','TBJ'],['pol','Polarização'],['div','Divisor'],['chave','Chave'],['jfet','JFET'],['mosfet','MOSFET'],['ampop','Amp-Op']];
+  $('#exTabs').innerHTML=tabs.map(([k,l])=>{const items=BANK.filter(q=>k==='all'||q.topic===k),d=items.filter(q=>done[q.id]).length;
+    return `<button type="button" class="chip" data-f="${k}" aria-pressed="${exMode==='list'&&exFilter===k}">${l} <span class="mono">${d}/${items.length}</span></button>`}).join('');
+  const ids=exMode==='sim'?simIds:BANK.filter(q=>exFilter==='all'||q.topic===exFilter).map(q=>q.id);
+  const list=$('#exList');list.innerHTML='';ids.forEach((id,i)=>list.appendChild(exCard(id,i)));
+  exSum();
+}
+function startSim(){
+  const by={};BANK.forEach(q=>(by[q.topic]=by[q.topic]||[]).push(q.id));
+  simIds=[];Object.keys(by).forEach(t=>shuffle(by[t]).slice(0,2).forEach(id=>simIds.push(id)));
+  simIds=shuffle(simIds);simIds.forEach(id=>inst_get(id,true));exMode='sim';renderEx();window.scrollTo(0,0);
+}
+function parseNum(v){const s=String(v).trim().replace(/\s+/g,'').replace(',','.');return /^-?\d+(\.\d+)?$/.test(s)?parseFloat(s):NaN}
+$('#exTabs').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;exFilter=b.dataset.f;exMode='list';renderEx()});
+$('#exSim').addEventListener('click',startSim);
+$('#exShuffle').addEventListener('click',()=>{BANK.forEach(q=>delete inst[q.id]);if(exMode==='sim')simIds.forEach(id=>inst_get(id,true));renderEx()});
+let resetArm=null;
+$('#exReset').addEventListener('click',()=>{
+  const b=$('#exReset');
+  if(!resetArm){b.textContent='Confirmar: apagar tudo';b.classList.add('primary');resetArm=setTimeout(()=>{b.textContent='Zerar progresso';b.classList.remove('primary');resetArm=null},4000);return}
+  clearTimeout(resetArm);resetArm=null;done={};cdState={};visited=[];lsDone={};store.set('lista',lsDone);if(lsReady)lsInit(true);store.set('done',done);store.set('cards',cdState);store.set('visited',visited);sess.a=0;sess.c=0;
+  b.textContent='Zerar progresso';b.classList.remove('primary');renderEx();meters();
+});
+$('#exBanner').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;
+  if(b.dataset.a==='leave'){exMode='list';renderEx()}else if(b.dataset.a==='again')startSim()});
+$('#exList').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const el=b.closest('.qcard'),id=el.dataset.id,it=inst[id],a=b.dataset.a,fb=$('.fb',el),hint=$('.hint',el);
+  if(a==='chk'){
+    const v=parseNum($('input',el).value);
+    if(isNaN(v)){fb.className='fb bad';fb.textContent='Digite um número, com vírgula ou ponto.';return}
+    const ok=Math.abs(v-it.ans)<=Math.max(Math.abs(it.ans)*0.02,1e-9);
+    it.tries++;
+    if(ok){fb.className='fb ok';fb.textContent=`Correto. ${fmt(it.ans,3)} ${it.unit}`;el.classList.add('ok');el.classList.remove('bad')}
+    else{
+      const r=it.ans?v/it.ans:0;
+      fb.className='fb bad';
+      fb.textContent=(Math.abs(r*1000-1)<.02*1000*.02||Math.abs(r-1000)<20||Math.abs(r-.001)<.00002)?`Quase: confira a unidade. A resposta deve estar em ${it.unit}.`:'Ainda não. Use a dica ou confira as contas.';
+      el.classList.add('bad');
+    }
+    score(id,it,ok);
+  }else if(a==='opt'){
+    if(it.answered)return;it.answered=true;
+    const k=+b.dataset.k,ok=!!it.opts[k].ok;
+    $$('.opt',el).forEach((o,j)=>{o.disabled=true;if(it.opts[j].ok)o.classList.add('right');else if(j===k)o.classList.add('wrong')});
+    fb.className='fb '+(ok?'ok':'bad');fb.textContent=ok?'Correto.':'Não é essa.';
+    hint.hidden=false;hint.innerHTML=it.why;el.classList.add(ok?'ok':'bad');
+    score(id,it,ok);
+  }else if(a==='hint'){hint.hidden=!hint.hidden;hint.innerHTML=it.hint}
+  else if(a==='sol'){const s=$('.sol',el);s.hidden=!s.hidden}
+  else if(a==='regen'||a==='redo'){inst_get(id,true);el.replaceWith(exCard(id,+el.dataset.i))}
+});
+$('#exList').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){const b=$('[data-a="chk"]',e.target.closest('.qcard'));if(b)b.click()}});
+document.addEventListener('click',e=>{const a=e.target.closest('a[data-topic]');if(a){exFilter=a.dataset.topic;exMode='list'}});
+
+/* ======================================================================
+   CARTÕES
+   ====================================================================== */
+const CARDS=[
+ ['TBJ','Quais são as três regiões de operação do TBJ?','Corte (chave aberta), ativa (amplifica) e saturação (chave fechada).'],
+ ['TBJ','Polarização das junções na região ativa?','Base-emissor direta e base-coletor reversa. É o efeito transistor.'],
+ ['TBJ','Polarização das junções na saturação?','As duas diretas. V<sub>CE</sub> ≈ 0 e I<sub>C</sub> no máximo que o circuito permite.'],
+ ['TBJ','Polarização das junções no corte?','As duas reversas. I<sub>B</sub> = 0, I<sub>C</sub> ≈ 0 e V<sub>CE</sub> ≈ V<sub>CC</sub>.'],
+ ['TBJ','Defina α.','α = I<sub>C</sub>/I<sub>E</sub>, entre 0,9 e 0,99. α = β/(β+1).'],
+ ['TBJ','Defina β (h<sub>FE</sub>).','β = I<sub>C</sub>/I<sub>B</sub> = α/(1−α). Varia com temperatura e corrente de coletor.'],
+ ['TBJ','Lei das correntes e das tensões do TBJ?','I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub> e V<sub>CE</sub> = V<sub>CB</sub> + V<sub>BE</sub>.'],
+ ['TBJ','Como são as camadas do TBJ?','Emissor muito dopado, base fina e pouco dopada, coletor grande. Quase todos os portadores do emissor chegam ao coletor.'],
+ ['TBJ','Onde fica a seta no símbolo do TBJ?','No emissor. NPN: para fora. PNP: para dentro.'],
+ ['TBJ','Fórmula da potência dissipada e onde sai o calor?','P<sub>D</sub> = I<sub>C</sub>·V<sub>CE</sub>. O calor sai principalmente pelo coletor.'],
+ ['TBJ','Qual V<sub>BE</sub> o professor usa nas contas?','0,6 V. Os slides usam 0,7 V.'],
+ ['TBJ','Quais são os extremos da reta de carga?','I<sub>C(sat)</sub> = V<sub>CC</sub>/R<sub>C</sub> (com V<sub>CE</sub> = 0) e V<sub>CE(corte)</sub> = V<sub>CC</sub> (com I<sub>C</sub> = 0).'],
+ ['Polarização','Receita de projeto, base constante?','V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub>; R<sub>B</sub> = V<sub>RB</sub>/I<sub>B</sub>; V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub>; R<sub>C</sub> = V<sub>RC</sub>/I<sub>C</sub>.'],
+ ['Polarização','Regra do emissor constante?','V<sub>RE</sub> ≈ 0,1·V<sub>CC</sub>. R<sub>E</sub> = 0,1V<sub>CC</sub>/I<sub>E</sub>; R<sub>B</sub> = (0,9V<sub>CC</sub> − V<sub>BE</sub>)/I<sub>B</sub>; R<sub>C</sub> = (0,9V<sub>CC</sub> − V<sub>CE</sub>)/I<sub>C</sub>.'],
+ ['Polarização','Por que usar R<sub>E</sub>?','Para estabilizar o ponto de operação quando o β ou a temperatura variam.'],
+ ['Chave','Como projetar a saturação forte?','I<sub>B</sub> = I<sub>C</sub>/10 e R<sub>B</sub> = (V<sub>CC</sub> − V<sub>BE</sub>)/I<sub>B</sub>. Arredonde para o valor comercial.'],
+ ['Chave','V<sub>CE</sub> na chave aberta e na fechada?','Aberta (corte): V<sub>CE</sub> ≈ V<sub>CC</sub>. Fechada (saturação): V<sub>CE</sub> ≈ 0.'],
+ ['Chave','Para que serve o diodo no relé?','Fica em antiparalelo com a bobina e protege o transistor do pico gerado ao desligar.'],
+ ['Chave','Quais são os terminais de um relé?','Comum, NF (normalmente fechado), NA (normalmente aberto) e os dois da bobina.'],
+ ['Chave','Como o LDR liga o relé?','Com luz a resistência é baixa e drena a corrente. No escuro é alta, a corrente vai à base, o transistor satura e o relé liga.'],
+ ['Chave','Como funciona o alarme com reed switch?','Porta fechada: ímã perto, contato aberto, nada acontece. Porta aberta: ímã longe, contato fecha, o transistor satura e a sirene toca.'],
+ ['FET','O que controla a corrente de um FET?','A tensão V<sub>GS</sub>. A corrente de porta é quase zero e o FET é unipolar.'],
+ ['FET','Terminais do FET?','Fonte (S), porta (G) e dreno (D).'],
+ ['JFET','Como fica a junção da porta de um JFET?','Polarizada reversamente. Por isso a impedância de entrada é muito alta.'],
+ ['JFET','O que é o pinch-off?','A depleção ocupa o canal e a corrente cai. Com |V<sub>GS</sub>| = |V<sub>P</sub>|, I<sub>D</sub> = 0.'],
+ ['JFET','O que é I<sub>DSS</sub>?','A corrente de dreno de saturação com V<sub>GS</sub> = 0.'],
+ ['JFET','Onde ocorre o pinçamento em V<sub>DS</sub>?','V<sub>DS(P)</sub> = |V<sub>P</sub>| − |V<sub>GS</sub>|.'],
+ ['JFET','Equação da corrente de dreno?','I<sub>D</sub> = I<sub>DSS</sub>(1 − V<sub>GS</sub>/V<sub>P</sub>)².'],
+ ['JFET','Receita de autopolarização?','R<sub>S</sub> = V<sub>P</sub>/I<sub>DSS</sub>; V<sub>RS</sub> = I<sub>D</sub>R<sub>S</sub>; R<sub>D</sub> = (V<sub>CC</sub> − V<sub>DS</sub> − V<sub>RS</sub>)/I<sub>D</sub>.'],
+ ['MOSFET','O que isola a porta do MOSFET?','Uma camada de óxido de silício. MOS = Metal-Óxido-Silício.'],
+ ['MOSFET','Depleção x enriquecimento?','Depleção já conduz com v<sub>GS</sub> = 0. Enriquecimento só conduz depois de passar V<sub>T</sub>.'],
+ ['MOSFET','Regiões de operação do MOSFET?','Corte: v<sub>GS</sub> &lt; V<sub>T</sub>. Triodo: v<sub>DS</sub> &lt; v<sub>GS</sub> − V<sub>T</sub>. Saturação: v<sub>DS</sub> ≥ v<sub>GS</sub> − V<sub>T</sub>.'],
+ ['MOSFET','I<sub>D</sub> na saturação?','I<sub>D</sub> = (k<sub>n</sub>/2)(v<sub>GS</sub> − V<sub>T</sub>)².'],
+ ['MOSFET','I<sub>D</sub> no triodo?','I<sub>D</sub> = k<sub>n</sub>[(v<sub>GS</sub> − V<sub>T</sub>)v<sub>DS</sub> − v<sub>DS</sub>²/2].'],
+ ['MOSFET','Qual é o método para resolver um circuito?','Supor saturação, calcular I<sub>D</sub> e V<sub>DS</sub> = V<sub>DD</sub> − I<sub>D</sub>R<sub>D</sub>, verificar a região e, se falhar, refazer em triodo.'],
+ ['Geral','Em que região cada transistor amplifica?','TBJ: região ativa. JFET e MOSFET: saturação (corrente constante).'],
+ ['Divisor','Por que o divisor de tensão é mais estável que a base constante?','A base é fixada por R<sub>B1</sub> e R<sub>B2</sub>, e com R<sub>E</sub> a corrente de emissor quase não depende do β.'],
+ ['Divisor','Regra da lista para a corrente do divisor?','I<sub>B2</sub> = 10·I<sub>B</sub> (a lista escreve I<sub>B</sub> = I<sub>B2</sub>/10).'],
+ ['Divisor','Quanto vale a tensão na base?','V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub>.'],
+ ['Divisor','Receita de R<sub>B2</sub> e R<sub>B1</sub>?','R<sub>B2</sub> = V<sub>B</sub>/I<sub>B2</sub>. R<sub>B1</sub> = (V<sub>CC</sub> − V<sub>B</sub>)/(I<sub>B2</sub> + I<sub>B</sub>), ou só I<sub>B2</sub> quando o gabarito despreza I<sub>B</sub>.'],
+ ['Divisor','Q6 e Q7 não dão V<sub>BE</sub> nem β. O que usar?','V<sub>BE</sub> = 0,6 V, β = 100, V<sub>RE</sub> = 10% de V<sub>CC</sub>, I<sub>E</sub> ≈ I<sub>C</sub> e corrente de R<sub>B1</sub> igual a I<sub>B2</sub>.'],
+ ['Amp-Op','Quais são as duas regras do AO ideal com realimentação negativa?','Corrente nas entradas é zero, e as tensões das entradas são iguais (terra virtual quando a (+) está no terra).'],
+ ['Amp-Op','Ganho do inversor?','A<sub>V</sub> = −R<sub>F</sub>/R<sub>1</sub>. O sinal entra pela entrada (−) através de R<sub>1</sub>.'],
+ ['Amp-Op','Ganho do não inversor?','A<sub>V</sub> = 1 + R<sub>F</sub>/R<sub>1</sub>, sempre maior ou igual a 1. O sinal entra na entrada (+).'],
+ ['Amp-Op','O que é o seguidor de tensão (buffer)?','Ganho 1, sem inversão. Isola estágios e casa impedâncias.'],
+ ['Amp-Op','Como converter ganho em dB?','A<sub>V(dB)</sub> = 20·log|A<sub>V</sub>|. Ganho 10 é 20 dB, 100 é 40 dB.'],
+ ['Amp-Op','Correntes no inversor?','I<sub>1</sub> = I<sub>F</sub> = V<sub>e</sub>/R<sub>1</sub>, I<sub>L</sub> = |V<sub>S</sub>|/R<sub>L</sub> e I<sub>O</sub> = I<sub>F</sub> + I<sub>L</sub>.'],
+ ['Amp-Op','Somador inversor?','V<sub>S</sub> = −R<sub>F</sub>(V<sub>1</sub>/R<sub>1</sub> + V<sub>2</sub>/R<sub>2</sub> + V<sub>3</sub>/R<sub>3</sub>).'],
+ ['Amp-Op','Subtrator?','V<sub>S</sub> = (R<sub>F</sub>/R<sub>1</sub>)(V<sub>2</sub> − V<sub>1</sub>). Rejeita o que for comum às duas entradas.'],
+ ['Amp-Op','Valores do 741 para decorar?','Alimentação até ±18 V, saída máxima de 25 mA, f<sub>unit</sub> ≈ 1 MHz, slew rate 0,5 V/µs, RRMC 90 dB.'],
+ ['Amp-Op','Fórmulas de frequência?','f<sub>unit</sub> = 0,35/t<sub>r</sub>, f<sub>c</sub> = f<sub>unit</sub>/A<sub>V</sub> e SR = 2π·f·V<sub>P</sub>.'],
+ ['Amp-Op','AO sem realimentação serve para quê?','Comparador e detector de nível: a saída satura em +V<sub>sat</sub> ou −V<sub>sat</sub>.'],
+ ['Lista N2','Q8: inversor com R<sub>1</sub> = 1k, R<sub>2</sub> = 4k7, V<sub>e</sub> = 1 V, R<sub>L</sub> = 10k.','A<sub>V</sub> = −4,7, V<sub>S</sub> = −4,7 V e I<sub>L</sub> = 0,47 mA.'],
+ ['Lista N2','Q9: R<sub>2</sub> = 220k e R<sub>1</sub> = 22k na realimentação.','A<sub>V</sub> = −10, circuito inversor.']
+];
+let cdFilter='all',cdOrder=CARDS.map((_,i)=>i),cdPos=0,cdState=store.get('cards',{});
+const cdList=()=>cdOrder.filter(i=>cdFilter==='all'||(cdFilter==='rev'&&cdState[i]!=='k')||(cdFilter==='k'&&cdState[i]==='k'));
+function renderCard(){
+  const known=Object.keys(cdState).filter(k=>cdState[k]==='k').length;
+  $('#cdTabs').innerHTML=[['all','Todos',CARDS.length],['rev','Para revisar',CARDS.length-known],['k','Sei',known]].map(([k,l,n])=>`<button type="button" class="chip" data-f="${k}" aria-pressed="${cdFilter===k}">${l} <span class="mono">${n}</span></button>`).join('');
+  const L=cdList(),fc=$('#cdCard');
+  if(!L.length){$('#cdQ').textContent='Nenhum cartão neste filtro.';$('#cdA').textContent='';$('#cdTagF').textContent='';$('#cdTagB').textContent='';$('#cdPos').textContent='';$('#cdState').hidden=true;fc.classList.remove('flip');return}
+  cdPos=((cdPos%L.length)+L.length)%L.length;
+  const i=L[cdPos],c=CARDS[i];
+  fc.classList.remove('flip');
+  $('#cdQ').innerHTML=c[1];$('#cdA').innerHTML=c[2];$('#cdTagF').textContent=c[0];$('#cdTagB').textContent='Resposta · '+c[0];
+  $('#cdPos').textContent=`${cdPos+1} de ${L.length}`;
+  const st=$('#cdState');st.hidden=false;st.className='badge '+(cdState[i]==='k'?'b-ok':'b-part');st.textContent=cdState[i]==='k'?'Marcado: sei':'Para revisar';
+}
+const cdMove=d=>{cdPos+=d;renderCard()};
+$('#cdCard').addEventListener('click',()=>$('#cdCard').classList.toggle('flip'));
+$('#cdNext').addEventListener('click',()=>cdMove(1));$('#cdPrev').addEventListener('click',()=>cdMove(-1));
+function cdMark(v){const L=cdList();if(!L.length)return;cdState[L[cdPos%L.length]]=v;store.set('cards',cdState);if(cdFilter==='all')cdPos++;renderCard()}
+$('#cdKnow').addEventListener('click',()=>cdMark('k'));$('#cdReview').addEventListener('click',()=>cdMark('r'));
+$('#cdShuf').addEventListener('click',()=>{cdOrder=shuffle(cdOrder);cdPos=0;renderCard()});
+$('#cdTabs').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b){cdFilter=b.dataset.f;cdPos=0;renderCard()}});
+document.addEventListener('keydown',e=>{
+  if($('[data-view="cartoes"]').hidden||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+  if(e.key==='ArrowRight')cdMove(1);else if(e.key==='ArrowLeft')cdMove(-1);
+  else if(e.key===' '&&e.target!==$('#cdCard')&&!e.target.closest('button')){e.preventDefault();$('#cdCard').classList.toggle('flip')}
+});
+
+/* ======================================================================
+   Figuras de circuito (SVG montado em código)
+   ====================================================================== */
+const W=d=>`<path class="wire" d="${d}"/>`;
+const TX=(x,y,t,a='middle',c='st')=>`<text class="${c}" x="${x}" y="${y}" text-anchor="${a}">${t}</text>`;
+const DOT=(x,y)=>`<circle cx="${x}" cy="${y}" r="3.4" fill="var(--ink)"/>`;
+const TERM=(x,y,t)=>`<circle cx="${x}" cy="${y}" r="4" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.6"/>`+(t?TX(x,y-10,t):'');
+const RV=(x,y,t,side)=>W(`M${x} ${y}v8l-9 5 18 10-18 10 18 10-18 10 9 5v8`)+(t?TX(x+(side==='l'?-16:16),y+38,t,side==='l'?'end':'start'):'');
+const RH=(x,y,t)=>W(`M${x} ${y}h8l5-9 10 18 10-18 10 18 10-18 5 9h8`)+(t?TX(x+33,y-14,t):'');
+const GND=(x,y)=>W(`M${x} ${y}v6M${x-12} ${y+6}h24M${x-8} ${y+11}h16M${x-4} ${y+16}h8`);
+const NPN=(x,y)=>{
+  const tx=x+34,ty=y+28,dx=34,dy=19,l=Math.hypot(dx,dy),ux=dx/l,uy=dy/l,px=-uy,py=ux,bx=tx-11*ux,by=ty-11*uy;
+  return `<circle cx="${x+12}" cy="${y}" r="35" fill="none" stroke="var(--ink)" stroke-width="1.4"/>`+
+    W(`M${x} ${y-22}V${y+22}`)+W(`M${x} ${y-9}L${tx} ${y-28}`)+W(`M${x} ${y+9}L${tx} ${ty}`)+
+    `<polygon points="${tx},${ty} ${(bx+4.6*px).toFixed(1)},${(by+4.6*py).toFixed(1)} ${(bx-4.6*px).toFixed(1)},${(by-4.6*py).toFixed(1)}" fill="var(--ink)"/>`;
+};
+function figTbj(kind){
+  const div=kind==='C',re=kind!=='A';
+  let s=TX(div?95:127,14,'VCC')+W(`M${div?70:80} 24H174`);
+  s+=W('M174 24V30')+RV(174,30,'RC')+W('M174 96V122')+W('M174 112H226')+DOT(174,112)+TERM(230,112,'')+TX(230,100,'saída');
+  s+=NPN(140,150);
+  if(div){
+    s+=W('M70 24V30')+RV(70,30,'RB1','l')+W('M70 96V170')+W('M70 150H140')+DOT(70,150)+RV(70,170,'RB2','l')+W('M70 236V262')+GND(70,262)+W('M26 150H70')+TERM(22,150,'');
+  }else{
+    s+=W('M80 24V30')+RV(80,30,'RB','l')+W('M80 96V150H140')+DOT(80,150)+W('M26 150H80')+TERM(22,150,'');
+  }
+  if(re)s+=W('M174 178V196')+RV(174,196,'RE')+GND(174,262);
+  else s+=W('M174 178V262')+GND(174,262);
+  return `<svg viewBox="0 0 270 290" role="img" aria-label="Circuito de polarização do transistor bipolar">${s}</svg>`;
+}
+function figAo(cfg,rl,fb){
+  fb=fb||'RF';
+  let s=`<polygon points="180,50 180,150 270,100" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.8"/>`+TX(190,81,'−','start','lbl')+TX(190,132,'+','start','lbl');
+  s+=W('M225 75V60')+TX(225,52,'+VCC')+W('M225 125V140')+TX(225,154,'−VCC');
+  s+=W('M270 100H300')+DOT(300,100)+W('M300 100H334')+TERM(338,100,'')+TX(338,88,'VS');
+  if(rl&&cfg!=='seg')s+=W('M300 100V122')+RV(300,122,'RL')+GND(300,188);
+  const fbk=(x)=>W(`M${x} 75V28H160`)+RH(160,28,fb)+W('M226 28H300V100');
+  if(cfg==='inv'){
+    s+=TERM(20,75,'Vi')+W('M24 75H36')+RH(36,75,'R1')+W('M102 75H180')+DOT(140,75)+fbk(140)+W('M180 125H150V150')+GND(150,150);
+  }else if(cfg==='non'){
+    s+=TERM(20,125,'Vi')+W('M24 125H180')+W('M180 75H150')+DOT(150,75)+fbk(150)+W('M150 75V90')+RV(150,90,'R1')+GND(150,156);
+  }else if(cfg==='seg'){
+    s+=TERM(20,125,'Vi')+W('M24 125H180')+W('M300 100V200H150V75H180')+DOT(300,100);
+  }else if(cfg==='som'){
+    [40,75,110].forEach((y,i)=>{s+=TERM(20,y,'V'+(i+1))+W(`M24 ${y}H30`)+RH(30,y,'R'+(i+1))+W(`M96 ${y}H135`)});
+    s+=W('M135 40V110')+DOT(135,75)+W('M135 75H180')+W('M135 40V28H160')+RH(160,28,fb)+W('M226 28H300V100')+W('M180 125H150V150')+GND(150,150);
+  }else if(cfg==='sub'){
+    s+=TERM(20,75,'V1')+W('M24 75H36')+RH(36,75,'R1')+W('M102 75H180')+DOT(140,75)+fbk(140);
+    s+=TERM(20,125,'V2')+W('M24 125H36')+RH(36,125,'R2')+W('M102 125H180')+DOT(140,125)+W('M140 125V140')+RV(140,140,'R3')+GND(140,206);
+  }else{
+    s+=TERM(20,75,'V−')+W('M24 75H180')+TERM(20,125,'V+')+W('M24 125H180');
+  }
+  return `<svg viewBox="0 -16 360 246" role="img" aria-label="Circuito com amplificador operacional">${s}</svg>`;
+}
+
+/* ======================================================================
+   Divisor de tensão: cálculo compartilhado
+   ====================================================================== */
+function divCalc(p){
+  const IC=p.IC/1000,IB=IC/p.B,IB2=p.k*IB,IE=p.iesum?IC+IB:IC,RE=p.VRE/IE,VB=p.VBE+p.VRE,RB2=VB/IB2;
+  const IR1=p.ibsum?IB2+IB:IB2,RB1=(p.VCC-VB)/IR1;
+  const VRC=p.mode==='vrc'?p.dado:p.VCC-p.dado-p.VRE,RC=VRC/IC,VCE=p.mode==='vce'?p.dado:p.VCC-VRC-p.VRE;
+  const st=[
+    `I<sub>B</sub> = I<sub>C</sub> / β = ${fmt(p.IC)} mA / ${fmt(p.B)} = <span class="r">${fmt(IB*1000,4)} mA</span> e I<sub>B2</sub> = ${fmt(p.k)}·I<sub>B</sub> = <span class="r">${fmt(IB2*1000,4)} mA</span>`,
+    p.iesum?`I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub> = ${fmt(IE*1000,4)} mA`:`I<sub>E</sub> ≈ I<sub>C</sub> = ${fmt(IE*1000,4)} mA`,
+    `R<sub>E</sub> = V<sub>RE</sub> / I<sub>E</sub> = ${fmt(p.VRE)} / ${fmt(IE,5)} = <span class="r">${fR(RE)}</span>`,
+    `V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub> = ${fmt(p.VBE)} + ${fmt(p.VRE)} = ${fmt(VB,2)} V, e R<sub>B2</sub> = V<sub>B</sub> / I<sub>B2</sub> = ${fmt(VB,2)} / ${fmt(IB2,6)} = <span class="r">${fR(RB2)}</span>`,
+    `R<sub>B1</sub> = (V<sub>CC</sub> − V<sub>B</sub>) / ${p.ibsum?'(I<sub>B2</sub> + I<sub>B</sub>)':'I<sub>B2</sub>'} = ${fmt(p.VCC-VB,2)} / ${fmt(IR1,6)} = <span class="r">${fR(RB1)}</span>`,
+    p.mode==='vrc'?`V<sub>RC</sub> = ${fmt(p.dado)} V (dado), então R<sub>C</sub> = V<sub>RC</sub> / I<sub>C</sub> = ${fmt(p.dado)} / ${fmt(IC,5)} = <span class="r">${fR(RC)}</span>`
+     :`V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub> − V<sub>RE</sub> = ${fmt(p.VCC)} − ${fmt(p.dado)} − ${fmt(p.VRE)} = ${fmt(VRC,2)} V, e R<sub>C</sub> = ${fmt(VRC,2)} / ${fmt(IC,5)} = <span class="r">${fR(RC)}</span>`
+  ];
+  return{IC,IB,IB2,IE,RE,VB,RB1,RB2,VRC,RC,VCE,steps:st};
+}
+const DVEX={
+  5:{VCC:10,IC:20,B:100,VRE:1,VBE:.7,mode:'vce',dado:5,ibsum:1,iesum:1,k:10},
+  6:{VCC:20,IC:5.8,B:100,VRE:2,VBE:.6,mode:'vrc',dado:10,ibsum:0,iesum:0,k:10},
+  7:{VCC:12,IC:12,B:100,VRE:1.2,VBE:.6,mode:'vce',dado:7,ibsum:0,iesum:0,k:10}
+};
+function dvRead(){return{VCC:+$('#dvVcc').value,IC:+$('#dvIc').value,B:+$('#dvB').value,VRE:+$('#dvVre').value,VBE:+$('#dvVbe').value,mode:$('#dvMode').value,dado:+$('#dvDado').value,ibsum:$('#dvIbsum').checked,iesum:$('#dvIesum').checked,k:10}}
+function simDv(){
+  const p=dvRead(),out=$('#dvSteps');
+  $('#dvDadoL').innerHTML=p.mode==='vce'?'V<sub>CE</sub> (V)':'V<sub>RC</sub> (V)';
+  if(!(p.VCC>0&&p.IC>0&&p.B>0&&p.VRE>0&&p.dado>0)){out.innerHTML='<li class="r">Preencha todos os campos com valores positivos.</li>';return}
+  if(p.VBE+p.VRE>=p.VCC){out.innerHTML='<li class="r">V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub> precisa ser menor que V<sub>CC</sub>.</li>';return}
+  if(p.mode==='vce'&&p.VCC-p.dado-p.VRE<=0){out.innerHTML='<li class="r">V<sub>CE</sub> + V<sub>RE</sub> precisa ser menor que V<sub>CC</sub>.</li>';return}
+  if(p.mode==='vrc'&&p.VRC>=p.VCC){out.innerHTML='<li class="r">V<sub>RC</sub> precisa ser menor que V<sub>CC</sub>.</li>';return}
+  const r=divCalc(p);
+  out.innerHTML=r.steps.map(s=>`<li>${s}</li>`).join('')+`<li>Conferência: V<sub>CE</sub> = ${fmt(r.VCE,2)} V · V<sub>CC</sub> = V<sub>RC</sub> + V<sub>CE</sub> + V<sub>RE</sub> = ${fmt(r.VRC,2)} + ${fmt(r.VCE,2)} + ${fmt(p.VRE,2)} = ${fmt(r.VRC+r.VCE+p.VRE,2)} V</li>`;
+}
+function dvInit(){
+  $('#dvFig').innerHTML=figTbj('C');
+  $('#simDv').addEventListener('input',simDv);$('#simDv').addEventListener('change',simDv);
+  $('#dvEx').addEventListener('click',e=>{const b=e.target.closest('[data-ex]');if(!b)return;const x=DVEX[b.dataset.ex];
+    $('#dvVcc').value=x.VCC;$('#dvIc').value=x.IC;$('#dvB').value=x.B;$('#dvVre').value=x.VRE;$('#dvVbe').value=String(x.VBE);$('#dvMode').value=x.mode;$('#dvDado').value=x.dado;$('#dvIbsum').checked=!!x.ibsum;$('#dvIesum').checked=!!x.iesum;simDv()});
+  simDv();
+}
+
+/* ======================================================================
+   Lista N2
+   ====================================================================== */
+const F=(k,l,u,ans,o)=>Object.assign({k,l,u,ans},o||{});
+const rI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const dd=(l,v,u)=>`${l} = ${v}${u?' '+u:''}`;
+const LISTA=[
+ {id:'q1',n:1,topic:'Base constante',fig:()=>figTbj('A'),
+  orig:{VCC:10,VCE:5,VBE:.7,IC:10,B:100},
+  gab:'R<sub>B</sub> = 93 kΩ · R<sub>C</sub> = 500 Ω',
+  gen(){const VCC=rpick([9,10,12,15]);return{VCC,VCE:VCC/2,VBE:.7,IC:rpick([5,10,20,25]),B:rpick([50,100,150,200])}},
+  build(p){
+    const IC=p.IC/1000,IB=IC/p.B,VRB=p.VCC-p.VBE,RB=VRB/IB,VRC=p.VCC-p.VCE,RC=VRC/IC;
+    return{stmt:'Para o circuito de polarização por corrente de base constante, determine R<sub>B</sub> e R<sub>C</sub>.',
+     dados:[dd('V<sub>CC</sub>',fmt(p.VCC),'V'),dd('V<sub>CE</sub>',fmt(p.VCE),'V'),dd('V<sub>BE</sub>',fmt(p.VBE),'V'),dd('I<sub>C</sub>',fmt(p.IC),'mA'),'β = '+p.B],
+     fields:[F('RB','R<sub>B</sub>','kΩ',RB/1000),F('RC','R<sub>C</sub>','Ω',RC)],
+     hint:'Ache I<sub>B</sub> = I<sub>C</sub>/β. A tensão em R<sub>B</sub> é V<sub>CC</sub> − V<sub>BE</sub> e a tensão em R<sub>C</sub> é V<sub>CC</sub> − V<sub>CE</sub>.',
+     steps:[`I<sub>B</sub> = I<sub>C</sub> / β = ${fmt(p.IC)} mA / ${p.B} = <span class="r">${fmt(IB*1000,4)} mA</span>`,
+      `V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub> = ${fmt(p.VCC)} − ${fmt(p.VBE)} = ${fmt(VRB,2)} V`,
+      `R<sub>B</sub> = V<sub>RB</sub> / I<sub>B</sub> = ${fmt(VRB,2)} / ${fmt(IB,5)} = <span class="r">${fR(RB)}</span>`,
+      `V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub> = ${fmt(p.VCC)} − ${fmt(p.VCE)} = ${fmt(VRC,2)} V`,
+      `R<sub>C</sub> = V<sub>RC</sub> / I<sub>C</sub> = ${fmt(VRC,2)} / ${fmt(IC,4)} = <span class="r">${fR(RC)}</span>`]}}},
+ {id:'q2',n:2,topic:'Base constante',fig:()=>figTbj('A'),
+  orig:{VCC:12,al:.99,VBE:.7,RB:240,RC:1.8},
+  gab:'I<sub>B</sub> = 47 µA · I<sub>C</sub> = 4,65 mA · V<sub>CE</sub> = 3,63 V',
+  gen(){for(;;){const p={VCC:12,al:rpick([.97,.98,.99,.995]),VBE:.7,RB:rpick([180,240,330,470]),RC:rpick([1,1.5,1.8,2.2])};
+    const B=p.al/(1-p.al),IC=B*(p.VCC-p.VBE)/(p.RB*1e3),VCE=p.VCC-IC*p.RC*1e3;if(VCE>=1.5)return p}},
+  build(p){
+    const B=p.al/(1-p.al),IB=(p.VCC-p.VBE)/(p.RB*1e3),IC=B*IB,VRC=IC*p.RC*1e3,VCE=p.VCC-VRC;
+    return{stmt:'Calcule os valores quiescentes (I<sub>B</sub>, I<sub>C</sub> e V<sub>CE</sub>) para o circuito da figura.',
+     dados:[dd('V<sub>CC</sub>',fmt(p.VCC),'V'),'α = '+fmt(p.al,3),dd('V<sub>BE</sub>',fmt(p.VBE),'V'),dd('R<sub>B</sub>',fmt(p.RB),'kΩ'),dd('R<sub>C</sub>',fmt(p.RC),'kΩ')],
+     fields:[F('IB','I<sub>B</sub>','µA',IB*1e6),F('IC','I<sub>C</sub>','mA',IC*1e3),F('VCE','V<sub>CE</sub>','V',VCE)],
+     hint:'O enunciado dá α, não β. Use β = α/(1−α). Depois I<sub>B</sub> = (V<sub>CC</sub> − V<sub>BE</sub>)/R<sub>B</sub>, I<sub>C</sub> = β·I<sub>B</sub> e V<sub>CE</sub> = V<sub>CC</sub> − I<sub>C</sub>·R<sub>C</sub>.',
+     steps:[`β = α / (1 − α) = ${fmt(p.al,3)} / ${fmt(1-p.al,3)} = <span class="r">${fmt(B,1)}</span>`,
+      `I<sub>B</sub> = (V<sub>CC</sub> − V<sub>BE</sub>) / R<sub>B</sub> = ${fmt(p.VCC-p.VBE,2)} / ${fmt(p.RB*1e3,0)} = <span class="r">${fmt(IB*1e6,2)} µA</span>`,
+      `I<sub>C</sub> = β · I<sub>B</sub> = ${fmt(B,1)} · ${fmt(IB*1e6,2)} µA = <span class="r">${fmt(IC*1e3,3)} mA</span>`,
+      `V<sub>RC</sub> = I<sub>C</sub> · R<sub>C</sub> = ${fmt(IC*1e3,3)} mA · ${fmt(p.RC)} kΩ = ${fmt(VRC,2)} V`,
+      `V<sub>CE</sub> = V<sub>CC</sub> − V<sub>RC</sub> = ${fmt(p.VCC)} − ${fmt(VRC,2)} = <span class="r">${fmt(VCE,2)} V</span>`]
+     .concat(p.al===.99&&p.RB===240?['O gabarito arredonda I<sub>B</sub> para 47 µA, daí 4,65 mA e 3,63 V. Sem arredondar dá 4,66 mA e 3,61 V, e as duas respostas valem.']:[])}}},
+ {id:'q3',n:3,topic:'Emissor constante',fig:()=>figTbj('B'),
+  orig:{VCC:10,VCE:5,VBE:.7,VRE:1,IC:20,B:100},
+  gab:'R<sub>E</sub> = 49,5 Ω · R<sub>B</sub> = 41,5 kΩ · R<sub>C</sub> = 200 Ω',
+  gen(){const VCC=rpick([10,12,15]);return{VCC,VCE:VCC/2,VBE:.7,VRE:rpick([1,1.2,1.5]),IC:rpick([10,20,25]),B:rpick([100,150,200])}},
+  build(p){
+    const IC=p.IC/1000,IB=IC/p.B,IE=IC+IB,RE=p.VRE/IE,VRB=p.VCC-p.VBE-p.VRE,RB=VRB/IB,VRC=p.VCC-p.VCE-p.VRE,RC=VRC/IC;
+    return{stmt:'Para o circuito abaixo, determine os valores de R<sub>B</sub>, R<sub>C</sub> e R<sub>E</sub>.',
+     dados:[dd('V<sub>CC</sub>',fmt(p.VCC),'V'),dd('V<sub>CE</sub>',fmt(p.VCE),'V'),dd('V<sub>BE</sub>',fmt(p.VBE),'V'),dd('V<sub>RE</sub>',fmt(p.VRE),'V'),dd('I<sub>C</sub>',fmt(p.IC),'mA'),'β = '+p.B],
+     fields:[F('RB','R<sub>B</sub>','kΩ',RB/1000),F('RC','R<sub>C</sub>','Ω',RC),F('RE','R<sub>E</sub>','Ω',RE)],
+     hint:'V<sub>CC</sub> = V<sub>RC</sub> + V<sub>CE</sub> + V<sub>RE</sub>. A corrente em R<sub>E</sub> é I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub>. Em R<sub>B</sub> cai V<sub>CC</sub> − V<sub>BE</sub> − V<sub>RE</sub>.',
+     steps:[`I<sub>B</sub> = I<sub>C</sub> / β = ${fmt(p.IC)} / ${p.B} = <span class="r">${fmt(IB*1000,4)} mA</span> e I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub> = ${fmt(IE*1000,4)} mA`,
+      `R<sub>E</sub> = V<sub>RE</sub> / I<sub>E</sub> = ${fmt(p.VRE)} / ${fmt(IE,5)} = <span class="r">${fR(RE)}</span>`,
+      `V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub> − V<sub>RE</sub> = ${fmt(p.VCC)} − ${fmt(p.VBE)} − ${fmt(p.VRE)} = ${fmt(VRB,2)} V, então R<sub>B</sub> = ${fmt(VRB,2)} / ${fmt(IB,6)} = <span class="r">${fR(RB)}</span>`,
+      `V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub> − V<sub>RE</sub> = ${fmt(p.VCC)} − ${fmt(p.VCE)} − ${fmt(p.VRE)} = ${fmt(VRC,2)} V, então R<sub>C</sub> = ${fmt(VRC,2)} / ${fmt(IC,4)} = <span class="r">${fR(RC)}</span>`]}}},
+ {id:'q4',n:4,topic:'Emissor constante',fig:()=>figTbj('B'),
+  orig:{VCC:12,IB:4,IE:.8,VBE:.7,VCE:5.7,RE:1.5},
+  gab:'β = 199 · R<sub>B</sub> = 2,53 MΩ · R<sub>C</sub> = 6,4 kΩ',
+  gen(){for(;;){const VCC=rpick([9,12,15]),p={VCC,IB:rpick([4,5,8,10]),IE:rpick([.8,1,1.2,2]),VBE:.7,VCE:Math.round(VCC*.45*10)/10,RE:rpick([.5,1,1.5])};
+    if(VCC-p.VCE-p.IE*p.RE>1&&p.IE*p.RE<.3*VCC&&VCC-p.VBE-p.IE*p.RE>0)return p}},
+  build(p){
+    const IC=p.IE-p.IB/1000,B=IC*1000/p.IB,VRE=p.IE*p.RE,VRB=p.VCC-p.VBE-VRE,RB=VRB/(p.IB*1e-6),VRC=p.VCC-p.VCE-VRE,RC=VRC/(IC/1000);
+    return{stmt:'No circuito abaixo, determine o valor de β, de R<sub>B</sub> e de R<sub>C</sub>.',
+     dados:[dd('V<sub>CC</sub>',fmt(p.VCC),'V'),dd('I<sub>B</sub>',fmt(p.IB),'µA'),dd('I<sub>E</sub>',fmt(p.IE),'mA'),dd('V<sub>BE</sub>',fmt(p.VBE),'V'),dd('V<sub>CE</sub>',fmt(p.VCE),'V'),dd('R<sub>E</sub>',fmt(p.RE),'kΩ')],
+     fields:[F('B','β','',B,{dec:1}),F('RB','R<sub>B</sub>','MΩ',RB/1e6),F('RC','R<sub>C</sub>','kΩ',RC/1000)],
+     hint:'I<sub>E</sub> = I<sub>C</sub> + I<sub>B</sub>, então I<sub>C</sub> = I<sub>E</sub> − I<sub>B</sub>. Use as mesmas malhas do exercício 3, com V<sub>RE</sub> = I<sub>E</sub>·R<sub>E</sub>.',
+     steps:[`I<sub>C</sub> = I<sub>E</sub> − I<sub>B</sub> = ${fmt(p.IE*1000,1)} µA − ${fmt(p.IB)} µA = <span class="r">${fmt(IC*1000,4)} mA</span>`,
+      `β = I<sub>C</sub> / I<sub>B</sub> = ${fmt(IC*1000,1)} µA / ${fmt(p.IB)} µA = <span class="r">${fmt(B,1)}</span>`,
+      `V<sub>RE</sub> = I<sub>E</sub> · R<sub>E</sub> = ${fmt(p.IE)} mA · ${fmt(p.RE)} kΩ = ${fmt(VRE,2)} V`,
+      `V<sub>RB</sub> = V<sub>CC</sub> − V<sub>BE</sub> − V<sub>RE</sub> = ${fmt(p.VCC)} − ${fmt(p.VBE)} − ${fmt(VRE,2)} = ${fmt(VRB,2)} V, então R<sub>B</sub> = ${fmt(VRB,2)} / ${fmt(p.IB*1e-6,6)} = <span class="r">${fR(RB)}</span>`,
+      `V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub> − V<sub>RE</sub> = ${fmt(p.VCC)} − ${fmt(p.VCE)} − ${fmt(VRE,2)} = ${fmt(VRC,2)} V, então R<sub>C</sub> = ${fmt(VRC,2)} / ${fmt(IC,6)} = <span class="r">${fR(RC)}</span>`]}}},
+ {id:'q5',n:5,topic:'Divisor de tensão',fig:()=>figTbj('C'),
+  orig:{VCC:10,VCE:5,VBE:.7,VRE:1,IC:20,B:100},
+  gab:'R<sub>B1</sub> = 3,8 kΩ · R<sub>B2</sub> = 850 Ω · R<sub>C</sub> = 200 Ω · R<sub>E</sub> = 49,5 Ω',
+  gen(){const VCC=rpick([10,12,15]);return{VCC,VCE:VCC/2,VBE:.7,VRE:rpick([1,1.2,1.5]),IC:rpick([10,20,25]),B:rpick([100,150,200])}},
+  build(p){
+    const r=divCalc({VCC:p.VCC,IC:p.IC,B:p.B,VRE:p.VRE,VBE:p.VBE,mode:'vce',dado:p.VCE,ibsum:1,iesum:1,k:10});
+    return{stmt:'Para o circuito abaixo (polarização por divisor de tensão), determine R<sub>B1</sub>, R<sub>B2</sub>, R<sub>C</sub> e R<sub>E</sub>.',
+     dados:[dd('V<sub>CC</sub>',fmt(p.VCC),'V'),dd('V<sub>CE</sub>',fmt(p.VCE),'V'),dd('V<sub>BE</sub>',fmt(p.VBE),'V'),dd('V<sub>RE</sub>',fmt(p.VRE),'V'),dd('I<sub>C</sub>',fmt(p.IC),'mA'),'β = '+p.B,'I<sub>B</sub> = I<sub>B2</sub>/10'],
+     fields:[F('RB1','R<sub>B1</sub>','kΩ',r.RB1/1000),F('RB2','R<sub>B2</sub>','Ω',r.RB2),F('RC','R<sub>C</sub>','Ω',r.RC),F('RE','R<sub>E</sub>','Ω',r.RE)],
+     hint:'I<sub>B2</sub> = 10·I<sub>B</sub>. A base fica em V<sub>B</sub> = V<sub>BE</sub> + V<sub>RE</sub>. R<sub>B2</sub> = V<sub>B</sub>/I<sub>B2</sub> e a corrente em R<sub>B1</sub> é I<sub>B2</sub> + I<sub>B</sub>.',
+     steps:r.steps}}},
+ {id:'q6',n:6,topic:'Divisor de tensão',fig:()=>figTbj('C'),
+  orig:{VCC:20,IC:5.8,VRC:10},
+  gab:'R<sub>C</sub> = 1724 Ω · R<sub>E</sub> = 344 Ω · R<sub>B1</sub> = 30 kΩ · R<sub>B2</sub> = 4,48 kΩ',
+  gen(){const VCC=rpick([15,20,24]);return{VCC,IC:rpick([4,5.8,8,10]),VRC:VCC/2}},
+  build(p){
+    const VRE=Math.round(.1*p.VCC*100)/100,r=divCalc({VCC:p.VCC,IC:p.IC,B:100,VRE,VBE:.6,mode:'vrc',dado:p.VRC,ibsum:0,iesum:0,k:10});
+    return{stmt:'Determinar os valores de R<sub>C</sub>, R<sub>E</sub>, R<sub>B1</sub> e R<sub>B2</sub> para que o circuito opere com a corrente de coletor e a tensão no resistor de coletor abaixo.',
+     dados:[dd('V<sub>CC</sub>',fmt(p.VCC),'V'),dd('I<sub>C</sub>',fmt(p.IC),'mA'),dd('V<sub>RC</sub>',fmt(p.VRC),'V'),'silício'],
+     fields:[F('RC','R<sub>C</sub>','Ω',r.RC),F('RE','R<sub>E</sub>','Ω',r.RE),F('RB1','R<sub>B1</sub>','kΩ',r.RB1/1000),F('RB2','R<sub>B2</sub>','kΩ',r.RB2/1000)],
+     hint:'Faltam dados, então use a convenção do gabarito: V<sub>BE</sub> = 0,6 V, β = 100, V<sub>RE</sub> = 10% de V<sub>CC</sub>, I<sub>E</sub> ≈ I<sub>C</sub>, I<sub>B2</sub> = 10·I<sub>B</sub> e a corrente de R<sub>B1</sub> igual a I<sub>B2</sub>.',
+     steps:[`Convenção do gabarito: V<sub>BE</sub> = 0,6 V, β = 100, V<sub>RE</sub> = 0,1·V<sub>CC</sub> = ${fmt(VRE,2)} V`].concat(r.steps)}}},
+ {id:'q7',n:7,topic:'Divisor de tensão',fig:()=>figTbj('C'),
+  orig:{VCC:12,VCE:7,IC:12},
+  gab:'R<sub>C</sub> = 317 Ω · R<sub>E</sub> = 100 Ω · R<sub>B1</sub> = 8,5 kΩ · R<sub>B2</sub> = 1,5 kΩ',
+  gen(){const VCC=rpick([12,15,18]);return{VCC,VCE:Math.round(VCC*.55),IC:rpick([8,10,12,15])}},
+  build(p){
+    const VRE=Math.round(.1*p.VCC*100)/100,r=divCalc({VCC:p.VCC,IC:p.IC,B:100,VRE,VBE:.6,mode:'vce',dado:p.VCE,ibsum:0,iesum:0,k:10});
+    return{stmt:'Determinar os valores de R<sub>C</sub>, R<sub>E</sub>, R<sub>B1</sub> e R<sub>B2</sub> para obter a tensão coletor-emissor e a corrente de coletor abaixo.',
+     dados:[dd('V<sub>CC</sub>',fmt(p.VCC),'V'),dd('V<sub>CE</sub>',fmt(p.VCE),'V'),dd('I<sub>C</sub>',fmt(p.IC),'mA'),'silício'],
+     fields:[F('RC','R<sub>C</sub>','Ω',r.RC),F('RE','R<sub>E</sub>','Ω',r.RE),F('RB1','R<sub>B1</sub>','kΩ',r.RB1/1000),F('RB2','R<sub>B2</sub>','kΩ',r.RB2/1000)],
+     hint:'Mesma convenção da Q6: V<sub>BE</sub> = 0,6 V, β = 100 e V<sub>RE</sub> = 10% de V<sub>CC</sub>. Aqui V<sub>RC</sub> = V<sub>CC</sub> − V<sub>CE</sub> − V<sub>RE</sub>.',
+     steps:[`Convenção do gabarito: V<sub>BE</sub> = 0,6 V, β = 100, V<sub>RE</sub> = 0,1·V<sub>CC</sub> = ${fmt(VRE,2)} V`].concat(r.steps)}}},
+ {id:'q8',n:8,topic:'Amp-Op inversor',fig:()=>figAo('inv',true,'R2'),
+  orig:{R1:1,Rf:4.7,Ve:1,RL:10},
+  gab:'V<sub>S</sub> = −4,7 V · I<sub>L</sub> = 0,47 mA',
+  gen(){for(;;){const p={R1:rpick([1,2.2,4.7,10]),Rf:rpick([4.7,10,22,47]),Ve:rpick([.5,1,1.5,2]),RL:rpick([2,4.7,10])};if(p.Rf/p.R1*p.Ve<=11&&p.Rf/p.R1>=1.5)return p}},
+  build(p){
+    const Av=-p.Rf/p.R1,Vs=Av*p.Ve,IL=Math.abs(Vs)/p.RL;
+    return{stmt:'Quais são, respectivamente, a tensão na saída e a corrente sobre a carga do amplificador operacional (AO) no circuito apresentado?',
+     dados:[dd('R<sub>1</sub>',fmt(p.R1),'kΩ'),dd('R<sub>2</sub>',fmt(p.Rf),'kΩ'),dd('R<sub>L</sub>',fmt(p.RL),'kΩ'),dd('V<sub>e</sub>',fmt(p.Ve),'V'),'741, ideal'],
+     fields:[F('Vs','V<sub>S</sub> (com sinal)','V',Vs),F('IL','I<sub>L</sub> (módulo)','mA',IL,{abs:1})],
+     hint:'O sinal entra pela entrada (−) através de R<sub>1</sub>, com R<sub>2</sub> na realimentação: é um inversor. A<sub>V</sub> = −R<sub>2</sub>/R<sub>1</sub>.',
+     steps:[`Configuração inversora: A<sub>V</sub> = −R<sub>2</sub> / R<sub>1</sub> = −${fmt(p.Rf)} / ${fmt(p.R1)} = <span class="r">${fmt(Av,3)}</span>`,
+      `V<sub>S</sub> = A<sub>V</sub> · V<sub>e</sub> = ${fmt(Av,3)} · ${fmt(p.Ve)} = <span class="r">${fmt(Vs,3)} V</span>`,
+      `I<sub>L</sub> = |V<sub>S</sub>| / R<sub>L</sub> = ${fmt(Math.abs(Vs),3)} V / ${fmt(p.RL)} kΩ = <span class="r">${fmt(IL,3)} mA</span>`,
+      `Extra: I<sub>1</sub> = I<sub>F</sub> = V<sub>e</sub>/R<sub>1</sub> = ${fmt(p.Ve/p.R1,3)} mA, então a corrente de saída do AO é I<sub>O</sub> = I<sub>F</sub> + I<sub>L</sub> = ${fmt(p.Ve/p.R1+IL,3)} mA.`]}}},
+ {id:'q9',n:9,topic:'Amp-Op: ganho',fig:p=>figAo(p.type,false,'R2'),
+  orig:{R1:22,R2:220,type:'inv'},
+  gab:'A<sub>V</sub> = −10 · circuito inversor',
+  gen(){const R1=rpick([10,22,47]),type=rpick(['inv','non']);return{R1,R2:R1*rpick([2,5,10,20]),type}},
+  build(p){
+    const inv=p.type==='inv',Av=inv?-p.R2/p.R1:1+p.R2/p.R1;
+    return{stmt:'O circuito abaixo representa um amplificador operacional ideal, polarizado por duas fontes (+V<sub>CC</sub> e −V<sub>CC</sub>). V<sub>i</sub> é o sinal de entrada e V<sub>0</sub> a saída amplificada. Qual é o ganho de tensão e qual o tipo de configuração (inversor ou não inversor)?',
+     dados:[dd('R<sub>1</sub>',fmt(p.R1),'kΩ'),dd('R<sub>2</sub>',fmt(p.R2),'kΩ'),inv?'V<sub>i</sub> entra pela entrada (−) via R<sub>1</sub>':'V<sub>i</sub> entra direto na entrada (+)'],
+     fields:[F('Av','Ganho A<sub>V</sub>','',Av,{dec:2}),{k:'tp',l:'Configuração',sel:inv?0:1,opts:['Inversor','Não inversor']}],
+     hint:'Veja onde o sinal entra. Pela entrada (−) através de R<sub>1</sub> é inversor, com A<sub>V</sub> = −R<sub>2</sub>/R<sub>1</sub>. Pela entrada (+) é não inversor, com A<sub>V</sub> = 1 + R<sub>2</sub>/R<sub>1</sub>.',
+     steps:[inv?`O sinal entra pela entrada (−) através de R<sub>1</sub>, e R<sub>2</sub> realimenta a saída: <b>inversor</b>.`:`O sinal entra direto na entrada (+), e R<sub>1</sub> e R<sub>2</sub> formam o divisor da realimentação na entrada (−): <b>não inversor</b>.`,
+      inv?`A<sub>V</sub> = −R<sub>2</sub> / R<sub>1</sub> = −${fmt(p.R2)} / ${fmt(p.R1)} = <span class="r">${fmt(Av,3)}</span>`:`A<sub>V</sub> = 1 + R<sub>2</sub> / R<sub>1</sub> = 1 + ${fmt(p.R2)} / ${fmt(p.R1)} = <span class="r">${fmt(Av,3)}</span>`,
+      `Em decibéis: 20·log|${fmt(Av,2)}| = ${fmt(20*Math.log10(Math.abs(Av)),1)} dB.`]}}}
+];
+const LQ={};LISTA.forEach(q=>LQ[q.id]=q);
+let lsDone=store.get('lista',{}),lsSt={},lsReady=false;
+function lsNew(q,mode){const p=mode==='orig'?q.orig:q.gen();return{mode,p,out:q.build(p),scored:false}}
+function lsCard(q){
+  const s=lsSt[q.id],o=s.out,el=document.createElement('article');
+  el.className='qcard';el.dataset.id=q.id;
+  el.innerHTML=`<div class="qh"><span class="qn">Q${q.n}</span><span class="tag">${q.topic}</span><span class="tag">${s.mode==='orig'?'original':'variante'}</span><span class="grow"></span>${s.mode==='orig'?'<button type="button" class="lnk" data-a="var">Nova variante</button>':'<button type="button" class="lnk" data-a="var">Outra variante</button> · <button type="button" class="lnk" data-a="orig">Original</button>'}</div>
+  <div class="qs">${o.stmt}</div>
+  <div class="lqgrid"><div class="fig">${q.fig(s.p)}</div>
+  <div><div class="dados">${o.dados.map(d=>`<span>${d}</span>`).join('')}</div>
+  <div class="mans">${o.fields.map(f=>f.opts?`<label class="mf"><span>${f.l}</span><select data-k="${f.k}"><option value="">escolha</option>${f.opts.map((t,i)=>`<option value="${i}">${t}</option>`).join('')}</select></label>`
+    :`<label class="mf"><span>${f.l}</span><span class="row"><input type="text" inputmode="decimal" autocomplete="off" data-k="${f.k}" placeholder="?"><span class="u">${f.u}</span></span></label>`).join('')}</div>
+  <div class="qa"><button type="button" class="btn primary" data-a="chk">Verificar</button><button type="button" class="btn" data-a="hint">Dica</button><button type="button" class="btn" data-a="sol">Ver resolução</button></div></div></div>
+  <div class="fb" aria-live="polite"></div>
+  <div class="note n-blue hint" hidden>${o.hint}</div>
+  <div class="sol" hidden><ol class="steps">${o.steps.map(t=>`<li>${t}</li>`).join('')}</ol>${s.mode==='orig'?`<div class="note n-amber"><p><b>Gabarito do professor:</b> ${q.gab}</p></div>`:''}</div>`;
+  return el;
+}
+function lsSum(){
+  const n=LISTA.filter(q=>lsDone[q.id]).length;
+  $('#lsSum').innerHTML=`<b>Resolvidas:</b> ${n} de ${LISTA.length} <span style="color:var(--muted)">· uma questão conta quando você acerta todos os campos, no original ou numa variante</span>`;
+}
+function lsInit(force){
+  if(lsReady&&!force){lsSum();return}
+  lsReady=true;lsSt={};const list=$('#lsList');list.innerHTML='';
+  LISTA.forEach(q=>{lsSt[q.id]=lsNew(q,'orig');list.appendChild(lsCard(q))});
+  lsSum();
+}
+function lsSwap(id,mode){const q=LQ[id];lsSt[id]=lsNew(q,mode);const old=$(`.qcard[data-id="${id}"]`,$('#lsList'));old.replaceWith(lsCard(q))}
+$('#lsAllVar').addEventListener('click',()=>{LISTA.forEach(q=>lsSwap(q.id,'var'))});
+$('#lsAllOrig').addEventListener('click',()=>{LISTA.forEach(q=>lsSwap(q.id,'orig'))});
+$('#lsList').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const el=b.closest('.qcard'),id=el.dataset.id,s=lsSt[id],a=b.dataset.a,fb=$('.fb',el);
+  if(a==='var')lsSwap(id,'var');else if(a==='orig')lsSwap(id,'orig');
+  else if(a==='hint'){$('.hint',el).hidden=!$('.hint',el).hidden}
+  else if(a==='sol'){$('.sol',el).hidden=!$('.sol',el).hidden}
+  else if(a==='chk'){
+    let good=0,empty=0,signs=0;
+    s.out.fields.forEach(f=>{
+      const inp=$(`[data-k="${f.k}"]`,el);let ok=false;
+      if(f.opts){ if(inp.value==='')empty++;else ok=+inp.value===f.sel }
+      else{
+        if(inp.value.trim()==='')empty++;
+        const v=parseNum(inp.value);
+        if(!isNaN(v)){
+          const a1=f.abs?Math.abs(v):v,a2=f.abs?Math.abs(f.ans):f.ans;
+          ok=Math.abs(a1-a2)<=Math.max(Math.abs(a2)*0.03,1e-9);
+          if(!ok&&Math.abs(Math.abs(v)-Math.abs(f.ans))<=Math.abs(f.ans)*0.03)signs++;
+        }
+      }
+      inp.classList.toggle('ok',ok);inp.classList.toggle('bad',!ok&&inp.value!=='');
+      if(ok)good++;
+    });
+    const n=s.out.fields.length;
+    if(good===n){
+      fb.className='fb ok';fb.textContent='Tudo certo. Confira a resolução para ver se o seu caminho bate.';el.classList.add('ok');el.classList.remove('bad');
+      if(!lsDone[id]){lsDone[id]=1;store.set('lista',lsDone);lsSum()}
+    }else{
+      fb.className='fb bad';el.classList.add('bad');el.classList.remove('ok');
+      fb.textContent=`${good} de ${n} campos corretos.`+(empty?` Faltam ${empty} campos.`:'')+(signs?' Confira o sinal da resposta.':' Use a dica ou abra a resolução. A margem aceita é de 3%.');
+    }
+  }
+});
+$('#lsList').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){const b=$('[data-a="chk"]',e.target.closest('.qcard'));if(b)b.click()}});
+
+/* ======================================================================
+   Amplificador operacional: simulador
+   ====================================================================== */
+const AOC=[['inv','Inversor'],['non','Não inversor'],['seg','Seguidor'],['som','Somador'],['sub','Subtrator'],['cmp','Comparador']];
+const AOP={
+  inv:{R1:1,Rf:4.7,V1:1,V2:0,V3:0},non:{R1:1,Rf:9,V1:1,V2:0,V3:0},seg:{R1:1,Rf:1,V1:2,V2:0,V3:0},
+  som:{R1:1,Rf:5,V1:.2,V2:.4,V3:.6},sub:{R1:1,Rf:10,V1:1,V2:1.5,V3:0},cmp:{R1:1,Rf:1,V1:1,V2:0,V3:0}
+};
+const AOL={inv:['V<sub>e</sub>'],non:['V<sub>e</sub>'],seg:['V<sub>e</sub>'],som:['V<sub>1</sub>','V<sub>2</sub>','V<sub>3</sub>'],sub:['V<sub>1</sub> (entrada −)','V<sub>2</sub> (entrada +)'],cmp:['V<sub>+</sub> (sinal)','V<sub>−</sub> (referência)']};
+let aoC='inv';
+const fHz=h=>h>=1e6?fmt(h/1e6,3)+' MHz':h>=1e3?fmt(h/1e3,3)+' kHz':fmt(h,2)+' Hz';
+function aoSet(c){
+  aoC=c;const p=AOP[c];
+  $$('#aoTabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===c)));
+  $('#aoR1').value=p.R1;$('#aoRf').value=p.Rf;
+  ['V1','V2','V3'].forEach(k=>{const i=$('#ao'+k);i.value=p[k];i._u()});
+  const L=AOL[c];
+  [1,2,3].forEach(n=>{const w=$('#aoV'+n+'W');w.hidden=n>L.length;if(n<=L.length)$('#aoL'+n).innerHTML=L[n-1]});
+  $('#aoR1').closest('.field').hidden=(c==='seg'||c==='cmp');
+  $('#aoRfW').hidden=(c==='seg'||c==='cmp');
+  $('#aoRfW span').innerHTML=c==='som'?'R<sub>F</sub> (kΩ), R<sub>1</sub> = R<sub>2</sub> = R<sub>3</sub>':c==='sub'?'R<sub>F</sub> = R<sub>3</sub> (kΩ), R<sub>1</sub> = R<sub>2</sub>':'R<sub>F</sub> (kΩ)';
+  simAo();
+}
+function simAo(){
+  const c=aoC,R1=+$('#aoR1').value*1e3,Rf=+$('#aoRf').value*1e3,RL=+$('#aoRl').value*1e3,Vcc=+$('#aoVcc').value,v1=+$('#aoV1').value,v2=+$('#aoV2').value,v3=+$('#aoV3').value;
+  $('#aoFig').innerHTML=figAo(c,true);
+  const steps=$('#aoSteps'),msg=$('#aoMsg');
+  if(!(R1>0&&Rf>0&&RL>0)){steps.innerHTML='<li class="r">Os resistores precisam ser positivos.</li>';return}
+  const Vsat=Vcc-1;
+  const fn=x=>c==='inv'?-Rf/R1*x:c==='non'?(1+Rf/R1)*x:c==='seg'?x:c==='som'?-Rf/R1*(x+v2+v3):c==='sub'?Rf/R1*(v2-x):(x>v2?Vsat:-Vsat);
+  const ideal=fn(v1),sat=Math.abs(ideal)>Vsat,vs=Math.max(-Vsat,Math.min(Vsat,ideal));
+  const Av=c==='inv'||c==='som'?-Rf/R1:c==='non'?1+Rf/R1:c==='seg'?1:c==='sub'?Rf/R1:null;
+  let IF=0;
+  if(c==='inv'||c==='non')IF=v1/R1;else if(c==='som')IF=(v1+v2+v3)/R1;else if(c==='sub')IF=(v1-v2*Rf/(R1+Rf))/R1;
+  const IL=vs/RL,Io=(c==='seg'||c==='cmp')?Math.abs(IL):Math.abs(IF)+Math.abs(IL);
+  const reg=$('#aoReg');
+  if(c==='cmp'){reg.className='badge b-sat';reg.textContent=v1>v2?'saída em +V sat':'saída em −V sat'}
+  else if(sat){reg.className='badge b-sat';reg.textContent='saturado'}
+  else{reg.className='badge b-ok';reg.textContent='linear'}
+  $('#aoAv').textContent=Av==null?'muito alto':fmt(Av,3);
+  $('#aoDb').textContent=Av==null||Av===0?'—':fmt(20*Math.log10(Math.abs(Av)),2)+' dB';
+  $('#aoVs').textContent=fV(vs);
+  const lin=!sat&&c!=='cmp';
+  $('#aoIf').textContent=(lin&&c!=='seg')?fI(Math.abs(IF)):'—';
+  $('#aoIl').textContent=fI(Math.abs(IL));
+  $('#aoIo').textContent=lin||c==='seg'||c==='cmp'?fI(Io):'—';
+  // gráfico
+  const gain=Math.abs(Av||1),xr=Math.min(20,Math.max(5,Math.ceil(Vsat/Math.max(gain,.2)*1.6)));
+  const ym=Math.ceil(Vsat*1.2);
+  const A=axes({id:'cAo',xmin:-xr,xmax:xr,ymin:-ym,ymax:ym,xl:c==='cmp'?'V+ (V)':c==='sub'||c==='som'?'V1 (V)':'Ve (V)',yl:'VS (V)',label:'Característica de transferência do amplificador operacional'});
+  const clip=x=>Math.max(-Vsat,Math.min(Vsat,fn(x)));
+  let g=`<path class="crv" style="stroke-width:2.6" d="${path(sample(clip,-xr,xr,c==='cmp'?400:80),A.X,A.Y)}"/>`;
+  g+=[Vsat,-Vsat].map(y=>`<line x1="${A.X(-xr)}" x2="${A.X(xr)}" y1="${A.Y(y)}" y2="${A.Y(y)}" stroke="var(--red)" stroke-width="1.4" stroke-dasharray="6 5"/>`).join('');
+  const px=Math.max(-xr,Math.min(xr,v1));
+  $('#aoPlot').innerHTML=A.wrap(g,`<circle class="qpt" cx="${A.X(px)}" cy="${A.Y(vs)}" r="7"/>`);
+  // passos
+  let s='';
+  const sg=x=>fmt(x,3);
+  if(c==='inv'){s=`<li>A<sub>V</sub> = −R<sub>F</sub> / R<sub>1</sub> = −${fmt(Rf/1e3)} / ${fmt(R1/1e3)} = <span class="r">${sg(Av)}</span>, e em dB: 20·log|A<sub>V</sub>| = ${fmt(20*Math.log10(gain),2)} dB</li><li>V<sub>S</sub> = A<sub>V</sub>·V<sub>e</sub> = ${sg(Av)} · ${fmt(v1)} = <span class="r">${fV(ideal)}</span></li><li>I<sub>1</sub> = I<sub>F</sub> = V<sub>e</sub>/R<sub>1</sub> = ${fI(Math.abs(IF))} (terra virtual: a entrada − fica em 0 V)</li><li>I<sub>L</sub> = |V<sub>S</sub>|/R<sub>L</sub> = ${fI(Math.abs(ideal/RL))} e I<sub>O</sub> = I<sub>F</sub> + I<sub>L</sub></li>`}
+  else if(c==='non'){s=`<li>A<sub>V</sub> = 1 + R<sub>F</sub> / R<sub>1</sub> = 1 + ${fmt(Rf/1e3)} / ${fmt(R1/1e3)} = <span class="r">${sg(Av)}</span>, em dB: ${fmt(20*Math.log10(gain),2)} dB</li><li>V<sub>S</sub> = A<sub>V</sub>·V<sub>e</sub> = ${sg(Av)} · ${fmt(v1)} = <span class="r">${fV(ideal)}</span></li><li>I<sub>1</sub> = I<sub>F</sub> = V<sub>e</sub>/R<sub>1</sub> = ${fI(Math.abs(IF))} (curto virtual: R<sub>1</sub> vê V<sub>e</sub>)</li><li>I<sub>L</sub> = V<sub>S</sub>/R<sub>L</sub> = ${fI(Math.abs(ideal/RL))} e I<sub>O</sub> = I<sub>F</sub> + I<sub>L</sub></li>`}
+  else if(c==='seg'){s=`<li>Seguidor: V<sub>S</sub> = V<sub>e</sub> = <span class="r">${fV(ideal)}</span> e A<sub>V</sub> = 1 (0 dB)</li><li>Quem fornece a corrente da carga é o AO, não a fonte: I<sub>L</sub> = ${fI(Math.abs(ideal/RL))}. A fonte só vê a entrada de alta impedância.</li>`}
+  else if(c==='som'){s=`<li>V<sub>S</sub> = −R<sub>F</sub>(V<sub>1</sub>/R<sub>1</sub> + V<sub>2</sub>/R<sub>2</sub> + V<sub>3</sub>/R<sub>3</sub>) = −${fmt(Rf/1e3)}·(${fmt(v1)} + ${fmt(v2)} + ${fmt(v3)})/${fmt(R1/1e3)} = <span class="r">${fV(ideal)}</span></li><li>I<sub>F</sub> = soma das correntes de entrada = ${fI(Math.abs(IF))}</li>`}
+  else if(c==='sub'){s=`<li>V<sub>S</sub> = (R<sub>F</sub>/R<sub>1</sub>)(V<sub>2</sub> − V<sub>1</sub>) = ${fmt(Rf/R1)} · (${fmt(v2)} − ${fmt(v1)}) = <span class="r">${fV(ideal)}</span></li><li>Só a diferença é amplificada: se V<sub>1</sub> = V<sub>2</sub>, V<sub>S</sub> = 0, e por isso o subtrator rejeita ruído comum às duas entradas.</li>`}
+  else{s=`<li>Sem realimentação o ganho é altíssimo: se V<sub>+</sub> &gt; V<sub>−</sub> a saída vai a +V<sub>sat</sub>, senão a −V<sub>sat</sub>.</li><li>V<sub>+</sub> = ${fmt(v1)} V, V<sub>−</sub> = ${fmt(v2)} V, logo V<sub>S</sub> = <span class="r">${fV(vs)}</span>. Use como detector de nível ou de passagem por zero.</li>`}
+  steps.innerHTML=s;
+  let m='';
+  if(c!=='cmp'&&sat)m=`A saída calculada (${fV(ideal)}) passaria de ±V<sub>sat</sub> = ±${fmt(Vsat)} V. Ela satura e o ganho deixa de valer: reduza a entrada ou o ganho.`;
+  else if(Io>0.025&&c!=='cmp')m=`<b>Atenção:</b> I<sub>O</sub> = ${fI(Io)} passa dos 25 mA que um 741 entrega. Aumente R<sub>L</sub> ou use um reforçador de corrente.`;
+  msg.innerHTML=m;
+}
+function aoInit(){
+  $('#aoTabs').innerHTML=AOC.map(([k,l])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="false">${l}</button>`).join('');
+  $('#aoTabs').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b)aoSet(b.dataset.c)});
+  $('#simAo').addEventListener('input',e=>{if(e.target.closest('.calc'))return;simAo()});
+  aoSet('inv');
+  const calc=()=>{
+    const Av=+$('#cgAv').value;$('#cgOut').textContent=Av?'= '+fmt(20*Math.log10(Math.abs(Av)),2)+' dB':'—';
+    const tr=+$('#cfTr').value,Avf=+$('#cfAv').value;
+    if(tr>0){const fu=0.35/(tr*1e-6);$('#cfOut').innerHTML='f<sub>unit</sub> = '+fHz(fu)+(Avf>0?'<br>f<sub>c</sub> = '+fHz(fu/Avf):'')}else $('#cfOut').textContent='—';
+    const sr=+$('#csSr').value,vp=+$('#csVp').value;
+    $('#csOut').innerHTML=sr>0&&vp>0?'f<sub>máx</sub> = '+fHz(sr*1e6/(2*Math.PI*vp)):'—';
+    const db=+$('#crDb').value;$('#crOut').innerHTML='A<sub>d</sub>/A<sub>c</sub> = '+fmt(Math.pow(10,db/20),2);
+  };
+  $('#aoCalc').addEventListener('input',calc);calc();
+}
+
+
+/* ======================================================================
+   Navegação e progresso
+   ====================================================================== */
+const VIEWS=['inicio','lista','tbj','polarizacao','divisor','chave','jfet','mosfet','ampop','exercicios','cartoes','formulas'];
+let visited=store.get('visited',[]);
+function meters(){
+  const tr=VIEWS.length-1,v=visited.filter(x=>VIEWS.includes(x)&&x!=='inicio').length;
+  const d=Object.keys(done).filter(k=>BYID[k]).length,k=Object.keys(cdState).filter(x=>cdState[x]==='k').length;
+  $('#mVisV').textContent=`${v}/${tr}`;$('#mVisB').style.width=(v/tr*100)+'%';
+  $('#mExV').textContent=`${d}/${BANK.length}`;$('#mExB').style.width=(d/BANK.length*100)+'%';
+  $('#mCdV').textContent=`${k}/${CARDS.length}`;$('#mCdB').style.width=(k/CARDS.length*100)+'%';
+}
+function show(){
+  let id=location.hash.slice(1);if(!VIEWS.includes(id))id='inicio';
+  $$('[data-view]').forEach(s=>{s.hidden=s.dataset.view!==id});
+  $$('.nav a').forEach(a=>{if(a.dataset.go===id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  const cur=$('.nav a[aria-current="page"]'),nav=$('.nav');
+  if(cur&&nav.scrollWidth>nav.clientWidth&&getComputedStyle(nav).flexDirection==='row')nav.scrollLeft=cur.offsetLeft-nav.clientWidth/2+cur.clientWidth/2;
+  if(id!=='inicio'&&!visited.includes(id)){visited.push(id);store.set('visited',visited)}
+  window.scrollTo(0,0);
+  if(id==='exercicios')renderEx();else if(id==='cartoes')renderCard();else if(id==='lista')lsInit();
+  meters();
+}
+window.addEventListener('hashchange',show);
+
+/* ---------- partida ---------- */
+setReg('ativa');simAB();simB();simPol();simSw(true);simJ();simJb();simM();simMs();dvInit();aoInit();
+show();
+})();
+</script>
+
+</body></html>
